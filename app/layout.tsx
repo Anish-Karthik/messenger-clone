@@ -3,6 +3,7 @@ import { Inter } from "next/font/google"
 
 import TRPCProvider from "./_trpc/Provider"
 import "./globals.css"
+import { ToastProvider } from "@/components/provider/toaster-provider"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -18,6 +19,7 @@ export default function RootLayout({
 }) {
   return (
     <TRPCProvider>
+      <ToastProvider />
       <html lang="en">
         <body className={inter.className}>{children}</body>
       </html>

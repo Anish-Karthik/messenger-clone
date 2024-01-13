@@ -1,8 +1,9 @@
 "use client"
 
 import { useCallback, useEffect, useState } from "react"
-import { useSearchParams } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { newVerification } from "@/actions/new-verification"
+import toast from "react-hot-toast"
 import { BeatLoader } from "react-spinners"
 
 import { CardWrapper } from "@/components/auth/card-wrapper"
@@ -13,6 +14,7 @@ export const NewVerificationForm = () => {
   const [error, setError] = useState<string | undefined>()
   const [success, setSuccess] = useState<string | undefined>()
 
+  const router = useRouter()
   const searchParams = useSearchParams()
 
   const token = searchParams.get("token")
@@ -28,7 +30,12 @@ export const NewVerificationForm = () => {
     newVerification(token)
       .then((data) => {
         setSuccess(data.success)
-        setError(data.error)
+        if (data.success) {
+          toast.success("Your account has been verified!")
+          router.push("/auth/login")
+        } else {
+          setError(data.error)
+        }
       })
       .catch(() => {
         setError("Something went wrong!")
