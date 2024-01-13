@@ -4,8 +4,6 @@ import Image from "next/image"
 
 import { trpc } from "@/app/_trpc/client"
 
-import { trpc } from "@/app/_trpc/client"
-
 export default function Home() {
   const test = trpc.test.useQuery()
   return (
