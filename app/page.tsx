@@ -2,9 +2,12 @@
 
 import Image from "next/image"
 
+import { useCurrentUser } from "@/hooks/use-current-user"
 import { trpc } from "@/app/_trpc/client"
 
 export default function Home() {
+  const user = useCurrentUser()
+  console.log(user)
   const test = trpc.test.useQuery()
   console.log(test)
   return (
