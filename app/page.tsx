@@ -6,6 +6,7 @@ import { trpc } from "@/app/_trpc/client"
 
 export default function Home() {
   const test = trpc.test.useQuery()
+  console.log(test)
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
       {test.data ? (

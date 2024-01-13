@@ -81,3 +81,22 @@ model Message {
   senderId String @db.ObjectId
   sender   User   @relation(fields: [senderId], references: [id], onDelete: Cascade)
 }
+
+
+model PasswordResetToken {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  email String
+  token String @unique
+  expires DateTime
+
+  @@unique([email, token])
+}
+
+model VerificationToken {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  email String
+  token String @unique
+  expires DateTime
+
+  @@unique([email, token])
+}
