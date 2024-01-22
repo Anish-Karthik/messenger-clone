@@ -54,9 +54,9 @@ const ProfileDialog = () => {
         <Image
           src={"/images/placeholder.jpg"}
           alt="msg"
-          width={30}
-          height={30}
-          className="hover opacity-80"
+          width={40}
+          height={40}
+          className="rounded-full hover:opacity-70"
         />
       </DialogTrigger>
       <DialogContent className={"flex flex-col gap-3"}>

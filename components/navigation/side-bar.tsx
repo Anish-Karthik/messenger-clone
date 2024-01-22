@@ -13,12 +13,12 @@ const SideBar = () => {
   const pathname = usePathname()
   const router = useRouter()
   return (
-    <div className="absolute inset-y-0 left-0 flex w-20 flex-col items-center justify-between p-2 py-4">
+    <div className="absolute inset-y-0 left-0 flex w-20 flex-col items-center justify-between p-2 py-4 max-lg:hidden">
       <div className="flex flex-col items-center gap-1">
         <Link
           href={"/conversations"}
           className={cn(
-            "rounded-md p-3 hover:bg-slate-200",
+            "rounded-md p-3 opacity-60 hover:bg-slate-200 hover:opacity-100",
             pathname.includes("/conversations") && "bg-slate-100"
           )}
         >
@@ -27,7 +27,7 @@ const SideBar = () => {
         <Link
           href={"/users"}
           className={cn(
-            "rounded-md p-3 hover:bg-slate-200",
+            "hover: rounded-md p-3 opacity-60 hover:bg-slate-200",
             pathname.includes("/users") && "bg-slate-100"
           )}
         >
@@ -39,7 +39,7 @@ const SideBar = () => {
             router.push("/auth/login")
           }}
           className={cn(
-            "rounded-md p-3 hover:bg-slate-200",
+            "hover: rounded-md p-3 opacity-60 hover:bg-slate-200",
             pathname.includes("/auth") && "bg-slate-100"
           )}
         >
