@@ -13,7 +13,7 @@ const SideBar = () => {
   const pathname = usePathname()
   const router = useRouter()
   return (
-    <div className="absolute inset-y-0 left-0 flex w-20 flex-col items-center justify-between p-2 py-4 max-lg:hidden">
+    <div className="absolute inset-y-0 left-0 flex w-20 flex-col items-center justify-between border-r p-2 py-4 max-lg:hidden">
       <div className="flex flex-col items-center gap-1">
         <Link
           href={"/conversations"}

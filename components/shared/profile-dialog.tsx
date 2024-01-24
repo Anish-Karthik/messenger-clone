@@ -54,8 +54,8 @@ const ProfileDialog = () => {
         <Image
           src={"/images/placeholder.jpg"}
           alt="msg"
-          width={40}
-          height={40}
+          width={45}
+          height={45}
           className="rounded-full hover:opacity-70"
         />
       </DialogTrigger>

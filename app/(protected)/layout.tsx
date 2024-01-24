@@ -2,7 +2,6 @@ import { currentUser } from "@/lib/auth"
 import BottomBar from "@/components/navigation/bottom-bar"
 import SideBar from "@/components/navigation/side-bar"
 import SideBarContent from "@/components/navigation/side-bar-content"
-import { ToastProvider } from "@/components/provider/toaster-provider"
 
 export default async function RootLayout({
   children,
@@ -15,7 +14,9 @@ export default async function RootLayout({
       <main>
         <SideBar />
         <SideBarContent />
-        <div className="h-full">{children}</div>
+        <div className="absolute inset-y-0 left-[25rem] right-0 h-full">
+          {children}
+        </div>
         <BottomBar />
       </main>
     </html>

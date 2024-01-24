@@ -5,6 +5,9 @@ import { usePathname } from "next/navigation"
 
 import { cn } from "@/lib/utils"
 
+import ConversationsMenu from "../shared/conversations-menu"
+import UsersMenu from "../shared/users-menu"
+
 const SideBarContent = () => {
   const pathname = usePathname()
 
@@ -15,12 +18,12 @@ const SideBarContent = () => {
   return (
     <div
       className={cn(
-        "absolute inset-y-0 ml-20 w-80 p-6 max-lg:!m-0 max-lg:w-full max-lg:appearance-none max-lg:pb-16 ",
+        "absolute inset-y-0 ml-20 w-80 px-5 py-4 max-lg:!m-0 max-lg:w-full max-lg:appearance-none max-lg:pb-16 lg:border-r",
         notShow && "hidden"
       )}
     >
-      {pathname === "/conversations" && <div>Conversation</div>}
-      {pathname === "/users" && <div>Users</div>}
+      {pathname === "/conversations" && <ConversationsMenu />}
+      {pathname === "/users" && <UsersMenu />}
     </div>
   )
 }
