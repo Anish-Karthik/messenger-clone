@@ -18,7 +18,7 @@ const SideBarContent = () => {
   return (
     <div
       className={cn(
-        "absolute inset-y-0 ml-20 w-80 px-5 py-4 max-lg:!m-0 max-lg:w-full max-lg:appearance-none max-lg:pb-16 lg:border-r",
+        "absolute inset-y-0 ml-20 w-80 px-5 py-4 max-lg:inset-x-0 max-lg:!m-0 max-lg:w-full max-lg:pb-16 lg:border-r",
         notShow && "max-lg:hidden"
       )}
     >

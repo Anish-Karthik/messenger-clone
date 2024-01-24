@@ -12,11 +12,15 @@ const UserCard = ({
   image,
   name,
   message,
+  lastMessageTime,
+  isSeen = false,
 }: {
   id: string
-  image?: string
   name: string
+  image?: string
   message?: string
+  lastMessageTime?: string
+  isSeen?: boolean
 }) => {
   const pathname = usePathname()
   const conversationId = useMemo(() => pathname.split("/")?.pop(), [pathname])
@@ -28,7 +32,7 @@ const UserCard = ({
         conversationId === id ? "bg-gray-200/70" : "hover:bg-gray-100"
       )}
     >
-      <div className="relative h-12 w-14">
+      <div className="h-12 min-w-12">
         <Image
           src={image || "/images/placeholder.jpg"}
           alt="user"
@@ -37,9 +41,23 @@ const UserCard = ({
           className="rounded-full"
         />
       </div>
-      <div className="w-full">
-        <h1 className="text-md font-semibold">{name}</h1>
-        <p className="text-sm font-semibold">{message}</p>
+      <div className="flex w-full flex-col gap-1 overflow-x-clip">
+        <div className="flex justify-between">
+          <h1 className="text-left text-sm font-semibold">{name}</h1>
+          {lastMessageTime && (
+            <p className="text-right text-sm font-light text-gray-400">
+              {lastMessageTime}
+            </p>
+          )}
+        </div>
+        <p
+          className={cn(
+            "truncate text-left text-sm",
+            isSeen ? "text-gray-500" : "font-semibold"
+          )}
+        >
+          {message}
+        </p>
       </div>
     </Link>
   )
