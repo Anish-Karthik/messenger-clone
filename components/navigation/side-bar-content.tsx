@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils"
 import ConversationsMenu from "../shared/conversations-menu"
 import UsersMenu from "../shared/users-menu"
 
-const SideBarContent = () => {
+const SideBarContent = ({ className }: { className?: string }) => {
   const pathname = usePathname()
 
   const notShow = useMemo(() => {
@@ -18,8 +18,9 @@ const SideBarContent = () => {
   return (
     <div
       className={cn(
-        "absolute inset-y-0 ml-20 w-80 px-5 py-4 max-lg:inset-x-0 max-lg:!m-0 max-lg:w-full max-lg:pb-16 lg:border-r",
-        notShow && "max-lg:hidden"
+        "px-5 pt-4 lg:border-r",
+        notShow && "max-lg:hidden",
+        className
       )}
     >
       {pathname.includes("/conversations") && <ConversationsMenu />}

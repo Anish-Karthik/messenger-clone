@@ -16,23 +16,30 @@ const ConversationsMenu = () => {
   const id = useAuthUser((state) => state.id)
   console.log(id)
   const router = useRouter()
-  const { data, hasNextPage, fetchNextPage, isFetchingNextPage } =
-    trpc.users.getAllConversations.useInfiniteQuery(
-      {
-        limit: 10,
-        userId: id,
-      },
-      {
-        getNextPageParam: (lastPage) => lastPage.nextCursor,
-      }
-    )
+  const {
+    data,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+    fetchPreviousPage,
+  } = trpc.users.getAllConversations.useInfiniteQuery(
+    {
+      limit: 10,
+      userId: id,
+    },
+    {
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
+    }
+  )
   const { inView, ref } = useInView()
 
   useEffect(() => {
     if (inView && hasNextPage) {
       fetchNextPage()
+    } else if (!hasNextPage) {
+      fetchPreviousPage()
     }
-  }, [inView, hasNextPage, fetchNextPage])
+  }, [inView, hasNextPage, fetchNextPage, fetchPreviousPage])
   return (
     <div className="h-full w-full">
       <div className="mb-4 flex justify-between">

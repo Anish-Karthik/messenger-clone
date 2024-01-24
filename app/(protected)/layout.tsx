@@ -18,10 +18,8 @@ export default async function RootLayout({
     <html lang="en">
       <main>
         <SideBar user={user} />
-        <div className="max-lg:hidden">
-          <SideBarContent />
-        </div>
-        <div className="h-full max-lg:w-full lg:absolute lg:inset-y-0 lg:left-[25rem] lg:right-0">
+        <SideBarContent className="absolute inset-y-0 ml-20 w-80 max-lg:hidden" />
+        <div className="absolute inset-y-0 max-lg:inset-x-0 max-lg:bottom-16 lg:left-[25rem] lg:right-0">
           {children}
         </div>
         <BottomBar />
