@@ -17,7 +17,7 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <main>
-        <SideBar id={user.id} />
+        <SideBar user={user} />
         <SideBarContent />
         <div className="absolute inset-y-0 left-[25rem] right-0 h-full">
           {children}

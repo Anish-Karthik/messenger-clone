@@ -1,11 +1,14 @@
 "use client"
 
+import { useEffect } from "react"
 import Image from "next/image"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import toast from "react-hot-toast"
 import * as z from "zod"
+import { useShallow } from "zustand/react/shallow"
 
+import { useAuthUser } from "@/lib/store/zustand"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -36,25 +39,24 @@ const formSchema = z.object({
   }),
 })
 
-const ProfileDialog = ({ id }: { id: string }) => {
-  const userData = trpc.users.getById.useQuery(id)
+const ProfileDialog = () => {
+  const userState = useAuthUser(useShallow((state) => state))
   const updateUserData = trpc.users.update.useMutation()
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
   })
-  console.log(userData.data)
+  useEffect(() => {
+    form.setValue("name", userState.name!)
+  }, [form, userState.name])
+  console.log(userState)
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     await updateUserData.mutateAsync({
-      id,
+      id: userState.id,
       name: values.name,
     })
     toast.success("Profile updated")
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
     console.log(values)
-  }
-  if (userData.data?.name) {
-    form.setValue("name", userData.data.name)
   }
 
   return (
@@ -81,16 +83,11 @@ const ProfileDialog = ({ id }: { id: string }) => {
             <FormField
               control={form.control}
               name="name"
-              defaultValue={userData.data?.name || ""}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Name</FormLabel>
                   <FormControl>
-                    {userData.isLoading ? (
-                      <>Loading</>
-                    ) : (
-                      <Input placeholder="Name" {...field} autoComplete="no" />
-                    )}
+                    <Input placeholder="Name" {...field} autoComplete="no" />
                   </FormControl>
                   <FormDescription>
                     This is your public display name.
