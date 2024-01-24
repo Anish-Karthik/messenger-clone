@@ -24,7 +24,7 @@ const usersRouter = router({
         image: z.string().url().optional(),
       })
     )
-    .query(async ({ input: { name, email, image } }) => {
+    .mutation(async ({ input: { name, email, image } }) => {
       await db.user.create({ data: { name, email, image } })
     }),
   update: publicProcedure
@@ -35,7 +35,7 @@ const usersRouter = router({
         image: z.string().url().optional(),
       })
     )
-    .query(async ({ input: { id, name, image } }) => {
+    .mutation(async ({ input: { id, name, image } }) => {
       await db.user.update({ where: { id }, data: { name, image } })
     }),
   conversations: publicProcedure
@@ -61,7 +61,7 @@ const conversationsRouter = router({
         users: z.array(z.string()),
       })
     )
-    .query(async ({ input: { name, users } }) => {
+    .mutation(async ({ input: { name, users } }) => {
       await db.conversation.create({
         data: { name, users: { connect: users.map((id) => ({ id })) } },
       })
@@ -73,7 +73,7 @@ const conversationsRouter = router({
         name: z.string().optional(),
       })
     )
-    .query(async ({ input: { id, name } }) => {
+    .mutation(async ({ input: { id, name } }) => {
       await db.conversation.update({ where: { id }, data: { name } })
     }),
   messages: publicProcedure.input(z.string()).query(async ({ input: id }) => {

@@ -3,6 +3,7 @@
 import Image from "next/image"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
+import toast from "react-hot-toast"
 import * as z from "zod"
 
 import { Button } from "@/components/ui/button"
@@ -27,6 +28,7 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
+import { trpc } from "@/app/_trpc/client"
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -34,18 +36,25 @@ const formSchema = z.object({
   }),
 })
 
-const ProfileDialog = () => {
+const ProfileDialog = ({ id }: { id: string }) => {
+  const userData = trpc.users.getById.useQuery(id)
+  const updateUserData = trpc.users.update.useMutation()
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: "",
-    },
   })
-
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  console.log(userData.data)
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    await updateUserData.mutateAsync({
+      id,
+      name: values.name,
+    })
+    toast.success("Profile updated")
     // Do something with the form values.
     // ✅ This will be type-safe and validated.
     console.log(values)
+  }
+  if (userData.data?.name) {
+    form.setValue("name", userData.data.name)
   }
 
   return (
@@ -72,11 +81,16 @@ const ProfileDialog = () => {
             <FormField
               control={form.control}
               name="name"
+              defaultValue={userData.data?.name || ""}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="Name" {...field} />
+                    {userData.isLoading ? (
+                      <>Loading</>
+                    ) : (
+                      <Input placeholder="Name" {...field} autoComplete="no" />
+                    )}
                   </FormControl>
                   <FormDescription>
                     This is your public display name.

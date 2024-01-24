@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation"
+
 import { currentUser } from "@/lib/auth"
 import BottomBar from "@/components/navigation/bottom-bar"
 import SideBar from "@/components/navigation/side-bar"
@@ -9,10 +11,13 @@ export default async function RootLayout({
   children: React.ReactNode
 }) {
   const user = await currentUser()
+  if (!user) {
+    redirect("/auth/login")
+  }
   return (
     <html lang="en">
       <main>
-        <SideBar />
+        <SideBar id={user.id} />
         <SideBarContent />
         <div className="absolute inset-y-0 left-[25rem] right-0 h-full">
           {children}

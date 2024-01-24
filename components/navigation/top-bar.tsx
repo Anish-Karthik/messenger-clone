@@ -8,7 +8,7 @@ const TopBar = () => {
       <div className="p-3">
         <h1>Messenger</h1>
       </div>
-      <ProfileDialog />
+      {/* <ProfileDialog /> */}
     </div>
   )
 }

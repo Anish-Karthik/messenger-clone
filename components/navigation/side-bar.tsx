@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils"
 
 import ProfileDialog from "../shared/profile-dialog"
 
-const SideBar = () => {
+const SideBar = ({ id }: { id: string }) => {
   const pathname = usePathname()
   const router = useRouter()
   return (
@@ -46,7 +46,7 @@ const SideBar = () => {
           <Image src="/logout.svg" alt="msg" width={25} height={25} />
         </button>
       </div>
-      <ProfileDialog />
+      <ProfileDialog id={id} />
     </div>
   )
 }

@@ -19,11 +19,11 @@ const SideBarContent = () => {
     <div
       className={cn(
         "absolute inset-y-0 ml-20 w-80 px-5 py-4 max-lg:!m-0 max-lg:w-full max-lg:appearance-none max-lg:pb-16 lg:border-r",
-        notShow && "hidden"
+        notShow && "max-lg:hidden"
       )}
     >
-      {pathname === "/conversations" && <ConversationsMenu />}
-      {pathname === "/users" && <UsersMenu />}
+      {pathname.includes("/conversations") && <ConversationsMenu />}
+      {pathname.includes("/users") && <UsersMenu />}
     </div>
   )
 }
