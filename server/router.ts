@@ -108,7 +108,10 @@ const usersRouter = router({
 
 const conversationsRouter = router({
   getById: publicProcedure.input(z.string()).query(async ({ input: id }) => {
-    return await db.conversation.findUnique({ where: { id } })
+    return await db.conversation.findUnique({
+      where: { id },
+      include: { users: true },
+    })
   }),
   getAll: publicProcedure.query(async () => {
     return await db.conversation.findMany()

@@ -1,9 +1,12 @@
 import React from "react"
+import { redirect } from "next/navigation"
 
+import { currentUser } from "@/lib/auth"
 import MessageForm from "@/components/chat/message-form"
 import TopCard from "@/components/chat/top-card"
+import { serverClient } from "@/app/_trpc/serverClient"
 
-const layout = ({
+const layout = async ({
   children,
   params,
 }: {
@@ -11,19 +14,22 @@ const layout = ({
   params: { id: string }
 }) => {
   console.log(params)
+
+  const startTime = performance.now()
+
+  // const conversationDetail = await serverClient.conversations.getById(params.id)
+  // const user = (await currentUser())!
+  // if (!conversationDetail) {
+  //   redirect("/conversations")
+  // }
+  const endTime = performance.now()
+  const executionTime = endTime - startTime
+  console.log(`Execution time: ${executionTime} milliseconds`)
+
   return (
     <div className="relative h-full">
       <TopCard className="absolute inset-x-0 top-0" />
-      <div className="absolute inset-x-0 inset-y-16">
-        {children}
-        {/* {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14].map((item) => (
-          <div key={item} className="flex justify-end overflow-y-auto max-h-[90%]">
-            <div className="bg-gray-200 rounded-lg p-2 m-2">
-              <p className="text-gray-500">Hello</p>
-            </div>
-          </div>
-        ))} */}
-      </div>
+      <div className="absolute inset-x-0 inset-y-20">{children}</div>
       <MessageForm className="absolute inset-x-0 bottom-0" />
     </div>
   )
