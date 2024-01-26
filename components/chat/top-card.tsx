@@ -1,7 +1,11 @@
 import Image from "next/image"
 import { Conversation, User } from "@prisma/client"
+import { CircleEllipsisIcon, MenuIcon } from "lucide-react"
+import { FaEllipsisH } from "react-icons/fa"
 
 import { cn } from "@/lib/utils"
+
+import DetailsSheet from "./details-sheet"
 
 const TopCard = ({
   className,
@@ -42,7 +46,16 @@ const TopCard = ({
           </p>
         </div>
       </div>
-      <div></div>
+      <div>
+        {conversationDetail.isGroup ? (
+          <DetailsSheet conversationDetail={conversationDetail} />
+        ) : (
+          <DetailsSheet
+            conversationDetail={conversationDetail}
+            otherUserDetail={otherUserDetail}
+          />
+        )}
+      </div>
     </div>
   )
 }
