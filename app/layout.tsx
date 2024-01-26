@@ -4,9 +4,12 @@ import { Inter } from "next/font/google"
 import TRPCProvider from "./_trpc/Provider"
 import "./globals.css"
 import { auth } from "@/auth"
+import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin"
 import { SessionProvider } from "next-auth/react"
+import { extractRouterConfig } from "uploadthing/server"
 
 import { ToastProvider } from "@/components/provider/toaster-provider"
+import { ourFileRouter } from "@/app/api/uploadthing/core"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -27,6 +30,7 @@ export default async function RootLayout({
         <html lang="en">
           <body className={inter.className}>
             <ToastProvider />
+            <NextSSRPlugin routerConfig={extractRouterConfig(ourFileRouter)} />
             <div className="h-full">{children}</div>
           </body>
         </html>

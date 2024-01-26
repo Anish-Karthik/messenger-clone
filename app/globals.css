@@ -104,3 +104,5 @@ body,
 ::-webkit-scrollbar-thumb:hover {
   background: #888;
 }
+
+@import "~@uploadthing/react/styles.css"
