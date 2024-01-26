@@ -1,24 +1,19 @@
-"use client"
-
-import React, { useMemo } from "react"
 import Image from "next/image"
-import { useParams } from "next/navigation"
 import { Conversation, User } from "@prisma/client"
 
-import { useAuthUser } from "@/lib/store/zustand"
 import { cn } from "@/lib/utils"
-import { trpc } from "@/app/_trpc/client"
 
-const TopCard = ({ className }: { className?: string }) => {
-  const params = useParams()
-  const currentUserId = useAuthUser((user) => user.id)
-  const conversationDetail = trpc.conversations.getById.useQuery(
-    params.id as string
-  )
-  const otherUserDetail = useMemo(
-    () =>
-      conversationDetail?.data?.users.find((user) => user.id !== currentUserId),
-    [conversationDetail, currentUserId]
+const TopCard = ({
+  className,
+  currentUserId,
+  conversationDetail,
+}: {
+  className?: string
+  currentUserId: string
+  conversationDetail: Conversation & { users: User[] }
+}) => {
+  const otherUserDetail = conversationDetail.users.find(
+    (user) => user.id !== currentUserId
   )
   console.log("load")
   return (
@@ -40,7 +35,7 @@ const TopCard = ({ className }: { className?: string }) => {
         </div>
         <div className="flex w-full flex-col overflow-x-clip">
           <h1 className="text-md text-left font-normal">
-            {conversationDetail?.data?.name || otherUserDetail?.name}
+            {conversationDetail.name || otherUserDetail?.name}
           </h1>
           <p className="text-md -mt-1 truncate text-left font-light text-gray-500">
             {"Offline"}
