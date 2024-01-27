@@ -6,7 +6,7 @@ import { create } from "zustand"
 type UserAuthStore = ExtendedUser & {
   updateName: (name: string) => void
   updateImage: (image: string) => void
-  update: (user: User) => void
+  update: (user: Partial<User>) => void
 }
 
 export const useAuthUser = create<UserAuthStore>((set) => ({
@@ -15,7 +15,7 @@ export const useAuthUser = create<UserAuthStore>((set) => ({
   image: "",
   email: "",
   isOAuth: false,
-  updateName: (name) => set({ name }),
+  updateName: (name) => set((prev) => ({ ...prev, name })),
   updateImage: (image) => set({ image }),
   update: (user) => set(user),
 }))

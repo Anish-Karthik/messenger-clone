@@ -45,6 +45,7 @@ export const {
       if (session.user) {
         session.user.name = token.name
         session.user.email = token.email
+        session.user.image = token.image as string
         session.user.isOAuth = token.isOAuth as boolean
       }
 
@@ -62,6 +63,7 @@ export const {
       token.isOAuth = !!existingAccount
       token.name = existingUser.name
       token.email = existingUser.email
+      token.image = existingUser.image
 
       return token
     },

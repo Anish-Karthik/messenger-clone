@@ -1,14 +1,15 @@
 "use client"
 
-import { useEffect } from "react"
+import { useState } from "react"
 import Image from "next/image"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { User } from "next-auth"
 import { useForm } from "react-hook-form"
 import toast from "react-hot-toast"
 import * as z from "zod"
-import { useShallow } from "zustand/react/shallow"
 
-import { useAuthUser } from "@/lib/store/zustand"
+import { isBase64Image } from "@/lib/utils"
+import { useUploadThing } from "@/lib/utils/uploadthing"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -37,23 +38,59 @@ const formSchema = z.object({
   name: z.string().min(2, {
     message: "Username must be at least 2 characters.",
   }),
+  image: z.string().url(),
 })
 
-const ProfileDialog = () => {
-  const userState = useAuthUser(useShallow((state) => state))
+const ProfileDialog = ({ user }: { user: User }) => {
+  const [files, setFiles] = useState<File[]>([])
+  const { startUpload } = useUploadThing("multipleFileUploader")
   const updateUserData = trpc.users.update.useMutation()
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: user.name ?? "",
+      image: user.image ?? "",
+    },
   })
-  useEffect(() => {
-    form.setValue("name", userState.name!)
-  }, [form, userState.name])
-  console.log(userState)
+
+  function handleImageChange(
+    e: React.ChangeEvent<HTMLInputElement>,
+    onChange: (value: string) => void
+  ) {
+    e.preventDefault()
+    const fileReader = new FileReader()
+
+    if (e.target?.files && e.target.files.length > 0) {
+      const file = e.target?.files[0]
+      setFiles(Array.from(e.target.files))
+
+      if (!file.type.includes("image")) return
+
+      fileReader.onload = async (event) => {
+        const imageDataUrl = event.target?.result?.toString() || ""
+        onChange(imageDataUrl)
+      }
+
+      fileReader.readAsDataURL(file)
+    }
+  }
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    const blob = values.image
+
+    const hasImageChanged = isBase64Image(blob)
+
+    if (hasImageChanged) {
+      const imgRes = await startUpload(files)
+
+      if (imgRes && imgRes[0].url) {
+        values.image = imgRes[0].url
+      }
+    }
     await updateUserData.mutateAsync({
-      id: userState.id,
+      id: user.id,
       name: values.name,
+      image: values.image,
     })
     toast.success("Profile updated")
     console.log(values)
@@ -63,7 +100,7 @@ const ProfileDialog = () => {
     <Dialog>
       <DialogTrigger asChild>
         <Image
-          src={"/images/placeholder.jpg"}
+          src={user.image ?? "/images/placeholder.jpg"}
           alt="msg"
           width={45}
           height={45}
@@ -96,14 +133,55 @@ const ProfileDialog = () => {
                 </FormItem>
               )}
             />
+            <FormField
+              control={form.control}
+              name="image"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Photo</FormLabel>
+                  <div className="flex items-center gap-4">
+                    <div>
+                      <Image
+                        src={field.value || "/images/placeholder.jpg"}
+                        alt="Photo"
+                        width={45}
+                        height={45}
+                        className="rounded-full hover:opacity-70"
+                      />
+                    </div>
+                    <label
+                      htmlFor="photo-input"
+                      className="rounded-md bg-gray-200 p-1 px-3 hover:opacity-80"
+                    >
+                      Upload
+                    </label>
+                    <FormControl>
+                      <Input
+                        id="photo-input"
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        name={field.name}
+                        onChange={(e) => handleImageChange(e, field.onChange)}
+                      />
+                    </FormControl>
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <Separator />
             <DialogFooter className="-mt-2 flex justify-end">
               <div className="flex gap-2">
                 <DialogClose asChild>
-                  <Button type="reset">Cancel</Button>
+                  <Button type="reset" variant="secondary">
+                    Cancel
+                  </Button>
                 </DialogClose>
                 <DialogClose asChild>
-                  <Button type="submit">Save</Button>
+                  <Button type="submit" className="bg-sky-500">
+                    Save
+                  </Button>
                 </DialogClose>
               </div>
             </DialogFooter>

@@ -1,17 +1,20 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
+import { PersonIcon } from "@radix-ui/react-icons"
 import { format } from "date-fns"
 import { useInView } from "react-intersection-observer"
 
 import { useAuthUser } from "@/lib/store/zustand"
 import { trpc } from "@/app/_trpc/client"
 
+import GroupChatModal from "../group/group-dialog"
 import UserCard from "./user-card"
 
 const ConversationsMenu = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false)
   const utils = trpc.useUtils()
   const id = useAuthUser((state) => state.id)
   console.log(id)
@@ -44,13 +47,19 @@ const ConversationsMenu = () => {
     <div className="h-full w-full">
       <div className="mb-4 flex justify-between">
         <h1 className="text-2xl font-bold">Messages</h1>
-        <button className="rounded-full bg-slate-100 p-2 hover:opacity-70">
+        <GroupChatModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+        />
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="flex items-center space-x-2 rounded-full bg-slate-100 px-[6px] hover:opacity-80"
+        >
           <Image
-            src="/create-group.svg"
-            alt="create group"
+            src={"/create-group.svg"}
+            alt="create-group"
             width={20}
             height={20}
-            className="opacity-70"
           />
         </button>
       </div>
@@ -88,7 +97,9 @@ const ConversationsMenu = () => {
                     }
                     image={
                       conversation.users.find((user) => id !== user.id)
-                        ?.image || undefined
+                        ?.image ||
+                      (conversation?.isGroup && "/images/group.png") ||
+                      undefined
                     }
                     isSeen={
                       conversation.messages[0]?.seenIds?.includes(id) ?? false

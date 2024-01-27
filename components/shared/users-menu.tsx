@@ -14,7 +14,35 @@ const UsersMenu = () => {
   const router = useRouter()
   const id = useAuthUser((state) => state.id)
   console.log(id)
-  const createOrGetConversations = trpc.conversations.create.useMutation()
+  const createOrGetConversations = trpc.conversations.create.useMutation({
+    async onSuccess(newData, variables, context) {
+      await utils.users.getAllConversations.cancel()
+      utils.users.getAllConversations.setInfiniteData(
+        {
+          userId: id,
+          limit: 10,
+        },
+        (data) => {
+          if (!data) {
+            console.log("no data")
+            return {
+              pages: [],
+              pageParams: [],
+            }
+          }
+          const newPages = data.pages.map((page, i) => ({
+            ...page,
+            items:
+              i === 0 && page.items ? [newData, ...page.items] : page.items,
+          }))
+          return {
+            ...data,
+            pages: newPages,
+          }
+        }
+      )
+    },
+  })
   const {
     data,
     hasNextPage,

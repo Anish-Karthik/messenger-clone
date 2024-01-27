@@ -38,7 +38,7 @@ const UserCard = ({
           alt="user"
           height={45}
           width={45}
-          className="rounded-full"
+          className="rounded-full bg-gray-200/70"
         />
       </div>
       <div className="flex w-full flex-col gap-1 overflow-x-clip">

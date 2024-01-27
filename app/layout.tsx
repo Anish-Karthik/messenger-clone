@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
 
 import TRPCProvider from "./_trpc/Provider"
 import "./globals.css"
@@ -31,6 +32,7 @@ export default async function RootLayout({
           <body className={inter.className}>
             <ToastProvider />
             <NextSSRPlugin routerConfig={extractRouterConfig(ourFileRouter)} />
+            <ReactQueryDevtools initialIsOpen={false} />
             <div className="h-full">{children}</div>
           </body>
         </html>

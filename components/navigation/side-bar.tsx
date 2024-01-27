@@ -54,7 +54,7 @@ const SideBar = ({ user }: { user: ExtendedUser }) => {
           <Image src="/logout.svg" alt="msg" width={25} height={25} />
         </button>
       </div>
-      <ProfileDialog />
+      <ProfileDialog user={user} />
     </div>
   )
 }

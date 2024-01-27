@@ -71,7 +71,11 @@ const usersRouter = router({
             },
           },
         },
+        orderBy: {
+          lastMessageAt: "desc",
+        },
       })
+      console.log(items)
       let nextCursor: typeof cursor | undefined = undefined
       if (items && items.length > limit) {
         const nextItem = items.pop()
@@ -133,6 +137,19 @@ const conversationsRouter = router({
               { users: { every: { id: { in: users } } } },
             ],
           },
+          include: {
+            users: true,
+            messages: {
+              orderBy: {
+                createdAt: "desc",
+              },
+              take: 1,
+              include: {
+                sender: true,
+                seen: true,
+              },
+            },
+          },
         })
         if (existing && existing.userIds.length === 2) {
           return existing
@@ -143,6 +160,19 @@ const conversationsRouter = router({
           isGroup,
           name,
           users: { connect: users.map((id) => ({ id })) },
+        },
+        include: {
+          users: true,
+          messages: {
+            orderBy: {
+              createdAt: "desc",
+            },
+            take: 1,
+            include: {
+              sender: true,
+              seen: true,
+            },
+          },
         },
       })
     }),
