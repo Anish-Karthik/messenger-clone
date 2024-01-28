@@ -14,7 +14,6 @@ const layout = async ({
   params: { id: string }
 }) => {
   console.log(params)
-
   const startTime = performance.now()
 
   const conversationDetail = await serverClient.conversations.getById(params.id)
@@ -34,7 +33,11 @@ const layout = async ({
         currentUserId={user.id}
       />
       <div className="absolute inset-x-0 inset-y-20">{children}</div>
-      <MessageForm className="absolute inset-x-0 bottom-0" />
+      <MessageForm
+        conversationId={conversationDetail.id}
+        senderId={user.id}
+        className="absolute inset-x-0 bottom-0"
+      />
     </div>
   )
 }

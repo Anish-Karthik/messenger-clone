@@ -33,43 +33,64 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
+import { trpc } from "@/app/_trpc/client"
 
 import { Button } from "../ui/button"
 
 interface MessageFormProps extends React.HTMLAttributes<HTMLButtonElement> {
-  // add your custom props here
+  senderId: string
+  conversationId: string
 }
+
 const formSchema = z.object({
   message: z.string(),
   files: z.array(z.string().url()).nullable(),
 })
 
-const MessageForm: React.FC<MessageFormProps> = ({ ...props }) => {
+const MessageForm: React.FC<MessageFormProps> = ({
+  senderId,
+  conversationId,
+  ...props
+}) => {
+  const sendMessage = trpc.messages.create.useMutation()
   const [files, setFiles] = useState<File[]>([])
   const { startUpload } = useUploadThing("multipleFileUploader")
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       message: "",
+      files: [],
     },
   })
   const { isSubmitting, isValid } = form.formState
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
+      const tmp = files
+      setFiles([])
       const imgRes = await startUpload(files)
-      if (imgRes && imgRes[0].url) {
+      if (imgRes && imgRes[0]?.url) {
         values.files = imgRes.map((img) => img.url)
       }
+      const message = await sendMessage.mutateAsync({
+        body: values.message,
+        images: values.files || [],
+        conversationId,
+        senderId,
+      })
+      console.log(message)
+      form.reset()
       // sumbit form
-      // toast.success("Message sent")
+      toast.success("Message sent")
     } catch (error) {
+      console.log(error)
       console.error(error)
       toast.error("something went wrong")
     }
     console.log(values)
   }
-
+  console.log(form.getValues())
+  console.log(isValid)
   function handleImageChange(
     e: React.ChangeEvent<HTMLInputElement>,
     appendTo: boolean

@@ -30,7 +30,6 @@ model User {
   messages Message[]
 }
 
-
 model Account {
   id                String  @id @default(auto()) @map("_id") @db.ObjectId
   userId            String  @db.ObjectId
@@ -67,7 +66,7 @@ model Conversation {
 model Message {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   body      String?
-  image     String?
+  images    String[]
   createdAt DateTime @default(now())
 
   seenIds String[] @db.ObjectId
@@ -83,20 +82,19 @@ model Message {
   sender   User   @relation(fields: [senderId], references: [id], onDelete: Cascade)
 }
 
-
 model PasswordResetToken {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-  email String
-  token String @unique
+  id      String   @id @default(auto()) @map("_id") @db.ObjectId
+  email   String
+  token   String   @unique
   expires DateTime
 
   @@unique([email, token])
 }
 
 model VerificationToken {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-  email String
-  token String @unique
+  id      String   @id @default(auto()) @map("_id") @db.ObjectId
+  email   String
+  token   String   @unique
   expires DateTime
 
   @@unique([email, token])

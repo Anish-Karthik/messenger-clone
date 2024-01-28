@@ -190,9 +190,17 @@ const conversationsRouter = router({
   getAllMessages: publicProcedure
     .input(z.string())
     .query(async ({ input: id }) => {
-      return await db.conversation
-        .findUnique({ where: { id } })
-        .messages({ include: { sender: true, seen: true } })
+      return await db.conversation.findUnique({
+        where: { id },
+        include: {
+          messages: {
+            include: {
+              sender: true,
+              seen: true,
+            },
+          },
+        },
+      })
     }),
   setSeen: publicProcedure
     .input(
@@ -259,16 +267,16 @@ export const messagesRouter = router({
         conversationId: z.string(),
         senderId: z.string(),
         body: z.string(),
-        image: z.string().url(),
+        images: z.array(z.string().url()).optional(),
       })
     )
-    .mutation(async ({ input: { conversationId, senderId, body, image } }) => {
+    .mutation(async ({ input: { conversationId, senderId, body, images } }) => {
       const newMessage = await db.message.create({
         data: {
           conversationId,
           senderId,
           body,
-          image,
+          images,
           seen: { connect: { id: senderId } },
         },
         include: {
@@ -289,18 +297,19 @@ export const messagesRouter = router({
           users: true,
         },
       })
-      await pusherServer.trigger(conversationId, "messages:new", newMessage)
+      // console.log(updatedConversation)
+      // await pusherServer.trigger(conversationId, "messages:new", newMessage)
+      // console.log("No prob here")
+      // // last message is the new message without the sender
+      // let lastMessage = { ...newMessage, sender: undefined }
+      // console.log(lastMessage)
 
-      // last message is the new message without the sender
-      let lastMessage = { ...newMessage, sender: undefined }
-
-      updatedConversation.users.map((user) => {
-        if (user.id === senderId) return
-        pusherServer.trigger(user.email!, "conversation:update", {
-          id: conversationId,
-          messages: [lastMessage],
-        })
-      })
+      // updatedConversation.users.forEach((user) => {
+      //   pusherServer.trigger(user.email!, "conversation:update", {
+      //     id: conversationId,
+      //     messages: [lastMessage],
+      //   })
+      // })
 
       return newMessage
     }),
@@ -314,4 +323,5 @@ export const appRouter = router({
   users: usersRouter,
   conversations: conversationsRouter,
 })
+
 export type AppRouter = typeof appRouter
