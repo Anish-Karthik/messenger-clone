@@ -52,7 +52,22 @@ const MessageForm: React.FC<MessageFormProps> = ({
   conversationId,
   ...props
 }) => {
-  const sendMessage = trpc.messages.create.useMutation()
+  const utils = trpc.useUtils()
+  const sendMessage = trpc.messages.create.useMutation({
+    // async onSuccess(data, variables, context) {
+    //   await utils.conversations.getAllMessages.cancel()
+    //   utils.conversations.getAllMessages.setData(
+    //     conversationId,
+    //     (current) => {
+    //       if (!current) return
+    //       return {
+    //         ...current,
+    //         messages: [...current.messages, data],
+    //       }
+    //     }
+    //   )
+    // },
+  })
   const [files, setFiles] = useState<File[]>([])
   const { startUpload } = useUploadThing("multipleFileUploader")
   const form = useForm<z.infer<typeof formSchema>>({
@@ -80,6 +95,13 @@ const MessageForm: React.FC<MessageFormProps> = ({
       })
       console.log(message)
       form.reset()
+      // utils.conversations.getAllMessages.setData(conversationId, (current) => {
+      //   if (!current) return
+      //   return {
+      //     ...current,
+      //     messages: [...current.messages, message],
+      //   }
+      // })
       // sumbit form
       toast.success("Message sent")
     } catch (error) {
