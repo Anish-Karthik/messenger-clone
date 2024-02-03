@@ -1,11 +1,11 @@
-import { getCurrentUser } from "@/lib/auth";
-import { db } from "@/lib/db";
-import { pusherServer } from "@/lib/pusher";
-import { NextResponse } from "next/server";
+import { NextResponse } from "next/server"
 
+import { getCurrentUser } from "@/lib/auth"
+import { db } from "@/lib/db"
+import { pusherServer } from "@/lib/pusher"
 
 interface IParams {
-  conversationId?: string;
+  conversationId?: string
 }
 
 export async function DELETE(
@@ -13,43 +13,47 @@ export async function DELETE(
   { params }: { params: IParams }
 ) {
   try {
-    const { conversationId } = params;
-    const currentUser = await getCurrentUser();
+    const { conversationId } = params
+    const currentUser = await getCurrentUser()
 
     if (!currentUser?.id) {
-      return NextResponse.json(null);
+      return NextResponse.json(null)
     }
 
     const existingConversation = await db.conversation.findUnique({
       where: {
-        id: conversationId
+        id: conversationId,
       },
       include: {
-        users: true
-      }
-    });
+        users: true,
+      },
+    })
 
     if (!existingConversation) {
-      return new NextResponse('Invalid ID', { status: 400 });
+      return new NextResponse("Invalid ID", { status: 400 })
     }
 
     const deletedConversation = await db.conversation.deleteMany({
       where: {
         id: conversationId,
         userIds: {
-          hasSome: [currentUser.id]
+          hasSome: [currentUser.id],
         },
       },
-    });
+    })
 
     existingConversation.users.forEach((user) => {
       if (user.email) {
-        pusherServer.trigger(user.email, 'conversation:remove', existingConversation);
+        pusherServer.trigger(
+          user.email,
+          "conversation:remove",
+          existingConversation
+        )
       }
-    });
+    })
 
     return NextResponse.json(deletedConversation)
   } catch (error) {
-    return NextResponse.json(null);
+    return NextResponse.json(null)
   }
 }

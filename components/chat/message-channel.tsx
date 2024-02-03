@@ -1,41 +1,48 @@
 "use client"
 
+import React, { useEffect, useRef } from "react"
+import Image from "next/image"
 import { FullMessageType } from "@/types"
-import axios from "axios"
 import { format } from "date-fns"
 import { find } from "lodash"
-import Image from "next/image"
-import { useEffect, useRef, useState } from "react"
 
 import { pusherClient } from "@/lib/pusher"
 import { cn } from "@/lib/utils"
+import { trpc } from "@/app/_trpc/client"
 
 import UserAvatar from "../shared/user-avatar"
 
 const MessageChannel = ({
   currentUserId,
   conversationId,
-  initialMessages
 }: {
   currentUserId: string
   conversationId: string
-  initialMessages: FullMessageType[];
 }) => {
-const bottomRef = useRef<HTMLDivElement>(null);
-  const [messages, setMessages] = useState(initialMessages);
-useEffect(() => {
-    axios.post(`/api/conversations/${conversationId}/seen`);
-  }, [conversationId]);
-  console.log(messages)
+  const utils = trpc.useUtils()
+  const bottomRef = useRef<HTMLDivElement>(null)
+  const conversationDetail =
+    trpc.conversations.getAllMessages.useQuery(conversationId)
+  const setCurrentUserHasSeen = trpc.conversations.setSeen.useMutation()
+  console.log(conversationDetail?.data)
+  useEffect(() => {
+    setCurrentUserHasSeen.mutateAsync({ conversationId, userId: currentUserId })
+  }, [conversationId, currentUserId])
+
+  console.log("hi")
   useEffect(() => {
     pusherClient.subscribe(conversationId)
-    bottomRef?.current?.scrollIntoView();
-    console.log('subscribed')
-    const messageHandler = (message: FullMessageType) => {
-      console.log('new message')
-      axios.post(`/api/conversations/${conversationId}/seen`);
+    bottomRef?.current?.scrollIntoView()
 
-      setMessages((current) => {
+    const messageHandler = async (message: FullMessageType) => {
+      console.log(message)
+      setCurrentUserHasSeen.mutateAsync({
+        conversationId,
+        userId: currentUserId,
+      })
+      // axios.post(`/api/conversations/${conversationId}/seen`);
+      await utils.conversations.getAllMessages.cancel()
+      utils.conversations.getAllMessages.setData(conversationId, (current) => {
         console.log(current)
         if (!current) return current
         if (find(current?.messages, { id: message.id })) {
@@ -67,18 +74,20 @@ useEffect(() => {
 
     pusherClient.bind("messages:new", messageHandler)
     pusherClient.bind("message:update", updateMessageHandler)
->>>>>>> trpc-pusher
 
     return () => {
       pusherClient.unsubscribe(conversationId)
-      pusherClient.unbind('messages:new', messageHandler)
-      pusherClient.unbind('message:update', updateMessageHandler)
+      pusherClient.unbind("messages:new", messageHandler)
+      pusherClient.unbind("message:update", updateMessageHandler)
     }
-  }, [conversationId]);
+  }, [conversationId, currentUserId, setCurrentUserHasSeen])
 
+  if (conversationDetail.isFetching) return <p>Loading...</p>
+  if (conversationDetail.error) return <p>{conversationDetail.error.message}</p>
+  console.log(conversationDetail.data)
   return (
     <div className="h-full overflow-y-auto">
-      {messages.map((item, i) => (
+      {conversationDetail.data?.messages?.map((item, i) => (
         <div
           key={item.id}
           className={cn(

@@ -3,6 +3,7 @@
 import React, { useState } from "react"
 import Image from "next/image"
 import { zodResolver } from "@hookform/resolvers/zod"
+import axios from "axios"
 import {
   ImageIcon,
   PlusCircleIcon,
@@ -36,7 +37,6 @@ import { Input } from "@/components/ui/input"
 import { trpc } from "@/app/_trpc/client"
 
 import { Button } from "../ui/button"
-import axios from "axios"
 
 interface MessageFormProps extends React.HTMLAttributes<HTMLButtonElement> {
   senderId: string
@@ -66,22 +66,22 @@ const MessageForm: React.FC<MessageFormProps> = ({
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      form.setValue('message', '', { shouldValidate: true });
-      form.reset();
+      form.setValue("message", "", { shouldValidate: true })
+      form.reset()
       const tmp = files
       setFiles([])
       const imgRes = await startUpload(files)
       if (imgRes && imgRes[0]?.url) {
         values.files = imgRes.map((img) => img.url)
-      }    
-      const message = await axios.post('/api/messages', {
+      }
+      const message = await axios.post("/api/messages", {
         message: values.message,
         images: values.files || [],
         conversationId,
         senderId,
       })
       console.log(message)
-      
+
       // utils.conversations.getAllMessages.setData(conversationId, (current) => {
       //   if (!current) return
       //   return {

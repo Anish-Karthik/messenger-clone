@@ -5,7 +5,6 @@ import { db } from "@/lib/db"
 import { pusherServer } from "@/lib/pusher"
 
 import { publicProcedure, router } from "../trpc"
-import { FullMessageType } from "@/types"
 
 export const conversationsRouter = router({
   getById: publicProcedure.input(z.string()).query(async ({ input: id }) => {
@@ -120,94 +119,94 @@ export const conversationsRouter = router({
   getAllMessages: publicProcedure
     .input(z.string())
     .query(async ({ input: id }) => {
-      const res =  (await db.message.findMany({
+      return await db.conversation.findUnique({
+        where: { id },
+        include: {
+          messages: {
+            include: {
+              sender: true,
+              seen: true,
+            },
+          },
+        },
+      })
+    }),
+
+  setSeen: publicProcedure
+    .input(
+      z.object({
+        conversationId: z.string(),
+        userId: z.string(),
+      })
+    )
+    .mutation(async ({ input: { conversationId, userId } }) => {
+      console.log(conversationId, userId)
+      const conversation = await db.conversation.findUnique({
         where: {
-          conversationId: id,
+          id: conversationId,
+        },
+        include: {
+          messages: {
+            orderBy: {
+              createdAt: "desc",
+            },
+            take: 1,
+            include: {
+              sender: true,
+              seen: true,
+            },
+          },
+          users: true,
+        },
+      })
+
+      if (!conversation) {
+        throw new Error("Conversation not found")
+      }
+
+      // Find last message
+      const lastMessage = conversation.messages[0]
+      console.log(lastMessage)
+      if (!lastMessage) {
+        return conversation
+      }
+
+      // Update seen of last message
+      const updatedMessage = await db.message.update({
+        where: {
+          id: lastMessage.id,
         },
         include: {
           sender: true,
           seen: true,
         },
-      }))!
+        data: {
+          seen: {
+            connect: {
+              id: userId,
+            },
+          },
+        },
+      })
 
-      return res
+      const currentUser = conversation.users.find((user) => user.id === userId)!
+      // Update all connections with new seen
+      await pusherServer.trigger(currentUser.id!, "conversation:update", {
+        id: conversationId,
+        messages: [updatedMessage],
+      })
+      console.log(lastMessage)
+      // If user has already seen the message, no need to go further
+      if (lastMessage.seenIds.indexOf(currentUser.id) !== -1) {
+        return conversation
+      }
+
+      // Update last message seen
+      await pusherServer.trigger(
+        conversationId!,
+        "message:update",
+        updatedMessage
+      )
+      return updatedMessage
     }),
-
-  // setSeen: publicProcedure
-  //   .input(
-  //     z.object({
-  //       conversationId: z.string(),
-  //       userId: z.string(),
-  //     })
-  //   )
-  //   .mutation(async ({ input: { conversationId, userId } }) => {
-  //     console.log(conversationId, userId)
-  //     const conversation = await db.conversation.findUnique({
-  //       where: {
-  //         id: conversationId,
-  //       },
-  //       include: {
-  //         messages: {
-  //           orderBy: {
-  //             createdAt: "desc",
-  //           },
-  //           take: 1,
-  //           include: {
-  //             sender: true,
-  //             seen: true,
-  //           },
-  //         },
-  //         users: true,
-  //       },
-  //     })
-
-  //     if (!conversation) {
-  //       throw new Error("Conversation not found")
-  //     }
-
-  //     // Find last message
-  //     const lastMessage = conversation.messages[0]
-  //     console.log(lastMessage)
-  //     if (!lastMessage) {
-  //       return conversation
-  //     }
-
-  //     // Update seen of last message
-  //     const updatedMessage = await db.message.update({
-  //       where: {
-  //         id: lastMessage.id,
-  //       },
-  //       include: {
-  //         sender: true,
-  //         seen: true,
-  //       },
-  //       data: {
-  //         seen: {
-  //           connect: {
-  //             id: userId,
-  //           },
-  //         },
-  //       },
-  //     })
-
-  //     const currentUser = conversation.users.find((user) => user.id === userId)!
-  //     // Update all connections with new seen
-  //     await pusherServer.trigger(currentUser.id!, "conversation:update", {
-  //       id: conversationId,
-  //       messages: [updatedMessage],
-  //     })
-  //     console.log(lastMessage)
-  //     // If user has already seen the message, no need to go further
-  //     if (lastMessage.seenIds.indexOf(currentUser.id) !== -1) {
-  //       return conversation
-  //     }
-
-  //     // Update last message seen
-  //     await pusherServer.trigger(
-  //       conversationId!,
-  //       "message:update",
-  //       updatedMessage
-  //     )
-  //     return updatedMessage
-  //   }),
 })
