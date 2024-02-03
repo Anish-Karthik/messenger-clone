@@ -9,7 +9,7 @@ import { FcGoogle } from "react-icons/fc"
 import { Button } from "@/components/ui/button"
 
 export const Social = () => {
-  const searchParams = useSearchParams()
+  const searchParams = useSearchParams()!
   const callbackUrl = searchParams.get("callbackUrl")
 
   const onClick = (provider: "google" | "github") => {

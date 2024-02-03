@@ -49,13 +49,6 @@ const MessageChannel = ({
         const newMessages = [...current.messages, message]
         return { ...current, messages: newMessages } as typeof current
       })
-      // setMessages((current) => {
-      //   if (find(current, { id: message.id })) {
-      //     return current;
-      //   }
-
-      //   return [...current, message]
-      // });
 
       bottomRef?.current?.scrollIntoView()
     }
@@ -75,13 +68,6 @@ const MessageChannel = ({
           }),
         } as typeof current
       })
-      // setMessages((current) => current.map((currentMessage) => {
-      //   if (currentMessage.id === newMessage.id) {
-      //     return newMessage;
-      //   }
-
-      //   return currentMessage;
-      // }))
     }
 
     pusherClient.bind("messages:new", messageHandler)

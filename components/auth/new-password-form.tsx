@@ -23,7 +23,7 @@ import { FormError } from "@/components/form-error"
 import { FormSuccess } from "@/components/form-success"
 
 export const NewPasswordForm = () => {
-  const searchParams = useSearchParams()
+  const searchParams = useSearchParams()!
   const token = searchParams.get("token")
 
   const [error, setError] = useState<string | undefined>("")

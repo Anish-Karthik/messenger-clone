@@ -1,3 +1,5 @@
+import { FullMessageType } from "@/types"
+import { Message } from "@prisma/client"
 import { z } from "zod"
 
 import { db } from "@/lib/db"
@@ -52,10 +54,18 @@ export const messagesRouter = router({
           console.log(lastMessage)
 
           updatedConversation.users.forEach((user) => {
-            pusherServer.trigger(user.id!, "conversation:update", {
+            const lastMessageToBeSent: {
+              id: string
+              messages: Message[]
+            } = {
               id: conversationId,
               messages: [lastMessage],
-            })
+            }
+            pusherServer.trigger(
+              user.id!,
+              "conversation:update",
+              lastMessageToBeSent
+            )
           })
         } catch (error) {
           console.log(error)

@@ -22,7 +22,7 @@ const UserCard = ({
   lastMessageTime?: string
   isSeen?: boolean
 }) => {
-  const pathname = usePathname()
+  const pathname = usePathname()!
   const conversationId = useMemo(() => pathname.split("/")?.pop(), [pathname])
   return (
     <Link

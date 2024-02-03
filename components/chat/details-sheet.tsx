@@ -1,10 +1,11 @@
 "use client"
 
-import React from "react"
 import Image from "next/image"
+import { useRouter } from "next/navigation"
 import { Conversation, User } from "@prisma/client"
 import { format } from "date-fns"
 import { Trash2Icon } from "lucide-react"
+import toast from "react-hot-toast"
 
 import {
   Sheet,
@@ -14,9 +15,9 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet"
+import { trpc } from "@/app/_trpc/client"
 
 import UserCard from "../shared/user-card"
-import { Button } from "../ui/button"
 import { Separator } from "../ui/separator"
 
 const DetailsSheet = ({
@@ -26,6 +27,18 @@ const DetailsSheet = ({
   conversationDetail?: Conversation & { users: User[] }
   otherUserDetail?: User
 }) => {
+  const router = useRouter()
+  const deleteConversation = trpc.conversations.delete.useMutation({
+    onSuccess(data, variables, context) {
+      console.log(data)
+      toast.success("Conversation deleted")
+      router.push("/conversations")
+    },
+    onError(data, variables, context) {
+      console.log(data)
+      toast.error("Error deleting conversation")
+    },
+  })
   return (
     <Sheet>
       <SheetTrigger>
@@ -52,7 +65,12 @@ const DetailsSheet = ({
                 <p className="text-md -mt-3 truncate text-left font-light text-gray-500">
                   {"Offline"}
                 </p>
-                <button className="mb-6 mt-4">
+                <button
+                  className="mb-6 mt-4"
+                  onClick={() =>
+                    deleteConversation.mutate(conversationDetail!.id)
+                  }
+                >
                   <div className="rounded-full bg-gray-100 p-3 hover:opacity-80">
                     <Trash2Icon size={20} />
                   </div>

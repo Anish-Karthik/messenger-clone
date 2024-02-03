@@ -30,7 +30,11 @@ const TopCard = ({
       <div className="flex items-center gap-3 rounded-lg">
         <div className="h-12 min-w-12">
           <Image
-            src={otherUserDetail?.image || "/images/placeholder.jpg"}
+            src={
+              conversationDetail.isGroup
+                ? "/images/group.png"
+                : otherUserDetail?.image || "/images/placeholder.jpg"
+            }
             alt="user"
             height={45}
             width={45}

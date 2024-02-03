@@ -1,3 +1,4 @@
+import { FullConversationType } from "@/types"
 import { z } from "zod"
 
 import { db } from "@/lib/db"
@@ -13,7 +14,23 @@ export const conversationsRouter = router({
     })
   }),
   getAll: publicProcedure.query(async () => {
-    return await db.conversation.findMany()
+    const conversations: FullConversationType[] =
+      await db.conversation.findMany({
+        include: {
+          users: true,
+          messages: {
+            orderBy: {
+              createdAt: "desc",
+            },
+            take: 1,
+            include: {
+              sender: true,
+              seen: true,
+            },
+          },
+        },
+      })
+    return conversations
   }),
   create: publicProcedure
     .input(
@@ -50,26 +67,34 @@ export const conversationsRouter = router({
           return existing
         }
       }
-      return await db.conversation.create({
-        data: {
-          isGroup,
-          name,
-          users: { connect: users.map((id) => ({ id })) },
-        },
-        include: {
-          users: true,
-          messages: {
-            orderBy: {
-              createdAt: "desc",
-            },
-            take: 1,
-            include: {
-              sender: true,
-              seen: true,
+      const newConversation: FullConversationType =
+        await db.conversation.create({
+          data: {
+            isGroup,
+            name,
+            users: { connect: users.map((id) => ({ id })) },
+          },
+          include: {
+            users: true,
+            messages: {
+              orderBy: {
+                createdAt: "desc",
+              },
+              take: 1,
+              include: {
+                sender: true,
+                seen: true,
+              },
             },
           },
-        },
+        })
+      console.log(newConversation.users)
+      newConversation.users.map((user) => {
+        if (user.id) {
+          pusherServer.trigger(user.id, "conversation:new", newConversation)
+        }
       })
+      return newConversation
     }),
 
   update: publicProcedure
@@ -82,6 +107,14 @@ export const conversationsRouter = router({
     .mutation(async ({ input: { id, name } }) => {
       await db.conversation.update({ where: { id }, data: { name } })
     }),
+
+  delete: publicProcedure.input(z.string()).mutation(async ({ input: id }) => {
+    const deletedConversation = await db.conversation.delete({ where: { id } })
+    deletedConversation.userIds.forEach((id) => {
+      pusherServer.trigger(id, "conversation:remove", deletedConversation.id)
+    })
+    return deletedConversation
+  }),
 
   getAllMessages: publicProcedure
     .input(z.string())

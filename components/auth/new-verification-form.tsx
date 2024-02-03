@@ -15,7 +15,7 @@ export const NewVerificationForm = () => {
   const [success, setSuccess] = useState<string | undefined>()
 
   const router = useRouter()
-  const searchParams = useSearchParams()
+  const searchParams = useSearchParams()!
 
   const token = searchParams.get("token")
 

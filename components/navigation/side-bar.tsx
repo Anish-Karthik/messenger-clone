@@ -14,7 +14,7 @@ import ProfileDialog from "../shared/profile-dialog"
 
 const SideBar = ({ user }: { user: ExtendedUser }) => {
   const setUser = useAuthUser((state) => state.update)
-  const pathname = usePathname()
+  const pathname = usePathname()!
   const router = useRouter()
   useEffect(() => {
     setUser(user)
