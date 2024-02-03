@@ -9,7 +9,7 @@ import ConversationsMenu from "../shared/conversations-menu"
 import UsersMenu from "../shared/users-menu"
 
 const SideBarContent = ({ className }: { className?: string }) => {
-  const pathname = usePathname()
+  const pathname = usePathname()!
 
   const notShow = useMemo(() => {
     return pathname.split("/").filter((x) => x !== "").length > 1

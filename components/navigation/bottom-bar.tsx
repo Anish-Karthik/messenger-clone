@@ -9,7 +9,7 @@ import { logout } from "@/actions/logout"
 import { cn } from "@/lib/utils"
 
 const BottomBar = () => {
-  const pathname = usePathname()
+  const pathname = usePathname()!
   const router = useRouter()
 
   const notShow = useMemo(() => {

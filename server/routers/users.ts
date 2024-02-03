@@ -1,3 +1,4 @@
+import { FullConversationType } from "@/types"
 import { z } from "zod"
 
 import { db } from "@/lib/db"
@@ -54,27 +55,29 @@ export const usersRouter = router({
     .query(async ({ input }) => {
       const limit = input.limit ?? 50
       const { userId: id, cursor } = input
-      const items = await db.user.findUnique({ where: { id } }).conversations({
-        take: limit + 1,
-        cursor: cursor ? { id: cursor } : undefined,
-        // include last message from the messages list also
-        include: {
-          users: true,
-          messages: {
-            orderBy: {
-              createdAt: "desc",
-            },
-            take: 1,
-            include: {
-              sender: true,
-              seen: true,
+      const items: FullConversationType[] = (await db.user
+        .findUnique({ where: { id } })
+        .conversations({
+          take: limit + 1,
+          cursor: cursor ? { id: cursor } : undefined,
+          // include last message from the messages list also
+          include: {
+            users: true,
+            messages: {
+              orderBy: {
+                createdAt: "desc",
+              },
+              take: 1,
+              include: {
+                sender: true,
+                seen: true,
+              },
             },
           },
-        },
-        orderBy: {
-          lastMessageAt: "desc",
-        },
-      })
+          orderBy: {
+            lastMessageAt: "desc",
+          },
+        }))!
       console.log(items)
       let nextCursor: typeof cursor | undefined = undefined
       if (items && items.length > limit) {

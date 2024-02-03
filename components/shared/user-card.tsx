@@ -4,8 +4,11 @@ import React, { useMemo } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { useActiveList } from "@/store/zustand"
 
 import { cn } from "@/lib/utils"
+
+import UserAvatar from "./user-avatar"
 
 const UserCard = ({
   id,
@@ -22,7 +25,7 @@ const UserCard = ({
   lastMessageTime?: string
   isSeen?: boolean
 }) => {
-  const pathname = usePathname()
+  const pathname = usePathname()!
   const conversationId = useMemo(() => pathname.split("/")?.pop(), [pathname])
   return (
     <Link
@@ -32,15 +35,7 @@ const UserCard = ({
         conversationId === id ? "bg-gray-200/70" : "hover:bg-gray-100"
       )}
     >
-      <div className="h-12 min-w-12">
-        <Image
-          src={image || "/images/placeholder.jpg"}
-          alt="user"
-          height={45}
-          width={45}
-          className="rounded-full bg-gray-200/70"
-        />
-      </div>
+      <UserAvatar image={image} id={id} />
       <div className="flex w-full flex-col gap-1 overflow-x-clip">
         <div className="flex justify-between">
           <h1 className="text-left text-sm font-semibold">{name}</h1>

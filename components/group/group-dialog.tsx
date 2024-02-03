@@ -36,31 +36,31 @@ const GroupChatModal: React.FC<GroupChatModalProps> = ({ isOpen, onClose }) => {
   })
   const createGroupChat = trpc.conversations.create.useMutation({
     async onSuccess(newData, variables, context) {
-      await utils.users.getAllConversations.cancel()
-      utils.users.getAllConversations.setInfiniteData(
-        {
-          userId: currUser!.id,
-          limit: 10,
-        },
-        (data) => {
-          if (!data) {
-            console.log("no data")
-            return {
-              pages: [],
-              pageParams: [],
-            }
-          }
-          const newPages = data.pages.map((page, i) => ({
-            ...page,
-            items:
-              i === 0 && page.items ? [newData, ...page.items] : page.items,
-          }))
-          return {
-            ...data,
-            pages: newPages,
-          }
-        }
-      )
+      // await utils.users.getAllConversations.cancel()
+      // utils.users.getAllConversations.setInfiniteData(
+      //   {
+      //     userId: currUser!.id,
+      //     limit: 10,
+      //   },
+      //   (data) => {
+      //     if (!data) {
+      //       console.log("no data")
+      //       return {
+      //         pages: [],
+      //         pageParams: [],
+      //       }
+      //     }
+      //     const newPages = data.pages.map((page, i) => ({
+      //       ...page,
+      //       items:
+      //         i === 0 && page.items ? [newData, ...page.items] : page.items,
+      //     }))
+      //     return {
+      //       ...data,
+      //       pages: newPages,
+      //     }
+      //   }
+      // )
     },
   })
   const form = useForm<FieldValues>({
@@ -78,7 +78,7 @@ const GroupChatModal: React.FC<GroupChatModalProps> = ({ isOpen, onClose }) => {
       users: [...values.members.map((user: any) => user.value), currUser?.id],
       isGroup: true,
     })
-    toast.success("Profile updated")
+    toast.success("Group chat created successfully")
     console.log(res)
     form.reset()
     onClose()

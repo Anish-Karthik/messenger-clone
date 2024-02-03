@@ -2,9 +2,9 @@
 
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
+import { useAuthUser } from "@/store/zustand"
 import { useInView } from "react-intersection-observer"
 
-import { useAuthUser } from "@/lib/store/zustand"
 import { trpc } from "@/app/_trpc/client"
 
 import UserCard from "./user-card"
@@ -16,31 +16,31 @@ const UsersMenu = () => {
   console.log(id)
   const createOrGetConversations = trpc.conversations.create.useMutation({
     async onSuccess(newData, variables, context) {
-      await utils.users.getAllConversations.cancel()
-      utils.users.getAllConversations.setInfiniteData(
-        {
-          userId: id,
-          limit: 10,
-        },
-        (data) => {
-          if (!data) {
-            console.log("no data")
-            return {
-              pages: [],
-              pageParams: [],
-            }
-          }
-          const newPages = data.pages.map((page, i) => ({
-            ...page,
-            items:
-              i === 0 && page.items ? [newData, ...page.items] : page.items,
-          }))
-          return {
-            ...data,
-            pages: newPages,
-          }
-        }
-      )
+      // await utils.users.getAllConversations.cancel()
+      // utils.users.getAllConversations.setInfiniteData(
+      //   {
+      //     userId: id,
+      //     limit: 10,
+      //   },
+      //   (data) => {
+      //     if (!data) {
+      //       console.log("no data")
+      //       return {
+      //         pages: [],
+      //         pageParams: [],
+      //       }
+      //     }
+      //     const newPages = data.pages.map((page, i) => ({
+      //       ...page,
+      //       items:
+      //         i === 0 && page.items ? [newData, ...page.items] : page.items,
+      //     }))
+      //     return {
+      //       ...data,
+      //       pages: newPages,
+      //     }
+      //   }
+      // )
     },
   })
   const {
@@ -84,7 +84,7 @@ const UsersMenu = () => {
       </div>
     )
   return (
-    <div className="h-full">
+    <div className="h-full w-full pb-12">
       <div className="mb-4 flex justify-between">
         <h1 className="text-2xl font-bold">People</h1>
       </div>
@@ -95,7 +95,7 @@ const UsersMenu = () => {
             <div
               key={i}
               className="flex flex-col gap-1"
-              ref={data.pages.length - 1 === i ? ref : undefined}
+              // ref={data.pages.length - 1 === i ? ref : undefined}
             >
               {page.items.map((user) => (
                 <button
@@ -107,6 +107,7 @@ const UsersMenu = () => {
               ))}
             </div>
           ))}
+        <div ref={ref} className="pt-24" />
       </div>
     </div>
   )

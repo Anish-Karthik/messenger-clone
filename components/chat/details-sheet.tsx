@@ -1,10 +1,11 @@
 "use client"
 
-import React from "react"
 import Image from "next/image"
+import { useRouter } from "next/navigation"
 import { Conversation, User } from "@prisma/client"
 import { format } from "date-fns"
 import { Trash2Icon } from "lucide-react"
+import toast from "react-hot-toast"
 
 import {
   Sheet,
@@ -14,9 +15,11 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet"
+import { trpc } from "@/app/_trpc/client"
 
+import Status from "../shared/status"
+import UserAvatar from "../shared/user-avatar"
 import UserCard from "../shared/user-card"
-import { Button } from "../ui/button"
 import { Separator } from "../ui/separator"
 
 const DetailsSheet = ({
@@ -26,6 +29,18 @@ const DetailsSheet = ({
   conversationDetail?: Conversation & { users: User[] }
   otherUserDetail?: User
 }) => {
+  const router = useRouter()
+  const deleteConversation = trpc.conversations.delete.useMutation({
+    onSuccess(data, variables, context) {
+      console.log(data)
+      toast.success("Conversation deleted")
+      router.push("/conversations")
+    },
+    onError(data, variables, context) {
+      console.log(data)
+      toast.error("Error deleting conversation")
+    },
+  })
   return (
     <Sheet>
       <SheetTrigger>
@@ -37,22 +52,30 @@ const DetailsSheet = ({
           <SheetDescription className="p-5">
             <div className="mt-8 flex flex-col">
               <div className="flex flex-col items-center justify-between gap-3">
-                <div className="h-12 min-w-12">
-                  <Image
-                    src={otherUserDetail?.image || "/images/placeholder.jpg"}
-                    alt="user"
-                    height={45}
-                    width={45}
-                    className="rounded-full"
-                  />
-                </div>
+                <UserAvatar
+                  id={conversationDetail?.isGroup ? "" : otherUserDetail?.id}
+                  image={
+                    conversationDetail?.isGroup
+                      ? "/images/group.png"
+                      : otherUserDetail?.image || "/images/placeholder.jpg"
+                  }
+                />
                 <h1 className="text-xl font-semibold">
                   {conversationDetail?.name || otherUserDetail?.name}
                 </h1>
-                <p className="text-md -mt-3 truncate text-left font-light text-gray-500">
-                  {"Offline"}
-                </p>
-                <button className="mb-6 mt-4">
+                <Status
+                  id={
+                    conversationDetail?.isGroup
+                      ? undefined
+                      : otherUserDetail?.id || undefined
+                  }
+                />
+                <button
+                  className="mb-6 mt-4"
+                  onClick={() =>
+                    deleteConversation.mutate(conversationDetail!.id)
+                  }
+                >
                   <div className="rounded-full bg-gray-100 p-3 hover:opacity-80">
                     <Trash2Icon size={20} />
                   </div>

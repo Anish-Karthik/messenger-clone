@@ -6,15 +6,15 @@ import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { logout } from "@/actions/logout"
 import { ExtendedUser } from "@/next-auth"
+import { useAuthUser } from "@/store/zustand"
 
-import { useAuthUser } from "@/lib/store/zustand"
 import { cn } from "@/lib/utils"
 
 import ProfileDialog from "../shared/profile-dialog"
 
 const SideBar = ({ user }: { user: ExtendedUser }) => {
   const setUser = useAuthUser((state) => state.update)
-  const pathname = usePathname()
+  const pathname = usePathname()!
   const router = useRouter()
   useEffect(() => {
     setUser(user)

@@ -10,6 +10,8 @@ import { useEffect, useRef, useState } from "react"
 import { pusherClient } from "@/lib/pusher"
 import { cn } from "@/lib/utils"
 
+import UserAvatar from "../shared/user-avatar"
+
 const MessageChannel = ({
   currentUserId,
   conversationId,
@@ -35,31 +37,37 @@ useEffect(() => {
 
       setMessages((current) => {
         console.log(current)
-        if (find(current, { id: message.id })) {
-          return current;
+        if (!current) return current
+        if (find(current?.messages, { id: message.id })) {
+          return current
         }
-        console.log('new message')
-        return [...current, message]
-      });
-      
-      bottomRef?.current?.scrollIntoView();
-    };
+        const newMessages = [...current.messages, message]
+        return { ...current, messages: newMessages } as typeof current
+      })
 
-    const updateMessageHandler = (newMessage: FullMessageType) => {
-      console.log('update message')
-      setMessages((current) => current.map((currentMessage) => {
-        console.log(currentMessage.id, newMessage.id)
-        if (currentMessage.id === newMessage.id) {
-          return newMessage;
-        }
-        console.log('no update')
-        return currentMessage;
-      }))
-    };
-  
+      bottomRef?.current?.scrollIntoView()
+    }
 
-    pusherClient.bind('messages:new', messageHandler)
-    pusherClient.bind('message:update', updateMessageHandler);
+    const updateMessageHandler = async (newMessage: FullMessageType) => {
+      console.log(newMessage)
+      await utils.conversations.getAllMessages.cancel()
+      utils.conversations.getAllMessages.setData(conversationId, (current) => {
+        if (!current) return current
+        return {
+          ...current,
+          messages: current.messages.map((currentMessage) => {
+            if (currentMessage.id === newMessage.id) {
+              return newMessage
+            }
+            return currentMessage
+          }),
+        } as typeof current
+      })
+    }
+
+    pusherClient.bind("messages:new", messageHandler)
+    pusherClient.bind("message:update", updateMessageHandler)
+>>>>>>> trpc-pusher
 
     return () => {
       pusherClient.unsubscribe(conversationId)
@@ -128,11 +136,12 @@ useEffect(() => {
                 <p className="text-white">{item.body}</p>
               </div>
             )}
+
             <div className="relative -mt-3">
               <div
                 className={cn(
                   "absolute -top-2 flex w-full min-w-44 gap-1",
-                  currentUserId === item.senderId ? "right-12" : "left-12"
+                  currentUserId === item.senderId ? "right-14" : "left-12"
                 )}
               >
                 <p
@@ -145,16 +154,14 @@ useEffect(() => {
                 >
                   {item.sender.name}
                 </p>
-                <p className="min-w-12 text-xs text-gray-500">
+                <p className="min-w-14 text-xs text-gray-500">
                   {format(item.createdAt, "p")}
                 </p>
               </div>
-              <Image
-                src={item.sender.image || "/images/placeholder.jpg"}
-                alt="image"
-                height={30}
-                width={30}
-                className="rounded-full"
+              <UserAvatar
+                image={item.sender.image || "/images/placeholder.jpg"}
+                id={item.sender.id}
+                size={30}
               />
             </div>
           </div>
