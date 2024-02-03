@@ -2,9 +2,9 @@
 
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
+import { useAuthUser } from "@/store/zustand"
 import { useInView } from "react-intersection-observer"
 
-import { useAuthUser } from "@/lib/store/zustand"
 import { trpc } from "@/app/_trpc/client"
 
 import UserCard from "./user-card"

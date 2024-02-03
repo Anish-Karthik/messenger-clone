@@ -19,3 +19,18 @@ export const useAuthUser = create<UserAuthStore>((set) => ({
   updateImage: (image) => set({ image }),
   update: (user) => set(user),
 }))
+
+interface ActiveListStore {
+  members: string[]
+  add: (id: string) => void
+  remove: (id: string) => void
+  set: (ids: string[]) => void
+}
+
+export const useActiveList = create<ActiveListStore>((set) => ({
+  members: [],
+  add: (id) => set((prev) => ({ members: [...prev.members, id] })),
+  remove: (id) =>
+    set((prev) => ({ members: prev.members.filter((m) => m !== id) })),
+  set: (ids) => set({ members: ids }),
+}))

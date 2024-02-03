@@ -17,6 +17,8 @@ import {
 } from "@/components/ui/sheet"
 import { trpc } from "@/app/_trpc/client"
 
+import Status from "../shared/status"
+import UserAvatar from "../shared/user-avatar"
 import UserCard from "../shared/user-card"
 import { Separator } from "../ui/separator"
 
@@ -50,21 +52,24 @@ const DetailsSheet = ({
           <SheetDescription className="p-5">
             <div className="mt-8 flex flex-col">
               <div className="flex flex-col items-center justify-between gap-3">
-                <div className="h-12 min-w-12">
-                  <Image
-                    src={otherUserDetail?.image || "/images/placeholder.jpg"}
-                    alt="user"
-                    height={45}
-                    width={45}
-                    className="rounded-full"
-                  />
-                </div>
+                <UserAvatar
+                  id={conversationDetail?.isGroup ? "" : otherUserDetail?.id}
+                  image={
+                    conversationDetail?.isGroup
+                      ? "/images/group.png"
+                      : otherUserDetail?.image || "/images/placeholder.jpg"
+                  }
+                />
                 <h1 className="text-xl font-semibold">
                   {conversationDetail?.name || otherUserDetail?.name}
                 </h1>
-                <p className="text-md -mt-3 truncate text-left font-light text-gray-500">
-                  {"Offline"}
-                </p>
+                <Status
+                  id={
+                    conversationDetail?.isGroup
+                      ? undefined
+                      : otherUserDetail?.id || undefined
+                  }
+                />
                 <button
                   className="mb-6 mt-4"
                   onClick={() =>

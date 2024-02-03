@@ -3,15 +3,14 @@
 import { useEffect, useMemo, useState } from "react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
+import { useAuthUser } from "@/store/zustand"
 import { FullConversationType } from "@/types"
 import { Message } from "@prisma/client"
-import { PersonIcon } from "@radix-ui/react-icons"
 import { format } from "date-fns"
 import { find } from "lodash"
 import { useInView } from "react-intersection-observer"
 
 import { pusherClient } from "@/lib/pusher"
-import { useAuthUser } from "@/lib/store/zustand"
 import { useCurrentUser } from "@/hooks/use-current-user"
 import { trpc } from "@/app/_trpc/client"
 
@@ -172,7 +171,7 @@ const ConversationsMenu = () => {
       pusherClient.unbind("conversation:update", updateHandler)
     }
   }, [id, pusherKey, utils.users.getAllConversations])
-
+  console.log(data)
   return (
     <div className="h-full w-full pb-12">
       <div className="mb-4 flex justify-between">
@@ -201,42 +200,59 @@ const ConversationsMenu = () => {
               className="flex flex-col gap-1"
               // ref={data.pages.length - 1 === i ? ref : undefined}
             >
-              {page.items?.map((conversation) => (
-                <button
-                  key={conversation.id}
-                  onClick={() =>
-                    router.push(`/conversations/${conversation.id}`)
-                  }
-                >
-                  <UserCard
+              {page.items?.map((conversation) => {
+                console.log(conversation.messages)
+                console.log(conversation.lastMessageAt)
+                console.log(conversation.createdAt)
+                console.log(
+                  new Date(conversation.lastMessageAt) >
+                    new Date(conversation.createdAt)
+                )
+                return (
+                  <button
                     key={conversation.id}
-                    id={conversation.id}
-                    name={
-                      conversation.name ??
-                      conversation.users.find((user) => id !== user.id)?.name ??
-                      ""
+                    onClick={() =>
+                      router.push(`/conversations/${conversation.id}`)
                     }
-                    lastMessageTime={format(
-                      new Date(conversation.lastMessageAt),
-                      "p"
-                    )}
-                    message={
-                      conversation.messagesIds.length > 0
-                        ? conversation.messages[0].body ?? ""
-                        : "Started a conversation"
-                    }
-                    image={
-                      conversation.users.find((user) => id !== user.id)
-                        ?.image ||
-                      (conversation?.isGroup && "/images/group.png") ||
-                      undefined
-                    }
-                    isSeen={
-                      conversation.messages[0]?.seenIds?.includes(id) ?? false
-                    }
-                  />
-                </button>
-              ))}
+                  >
+                    <UserCard
+                      key={conversation.id}
+                      id={conversation.id}
+                      name={
+                        conversation.name ??
+                        conversation.users.find((user) => id !== user.id)
+                          ?.name ??
+                        ""
+                      }
+                      lastMessageTime={format(
+                        new Date(conversation.lastMessageAt),
+                        "p"
+                      )}
+                      message={
+                        conversation.messages.length > 0
+                          ? `${
+                              conversation.messages[0].senderId === id
+                                ? "you: "
+                                : conversation.messages[0]?.sender?.name +
+                                    ": " || ""
+                            }${conversation.messages[0].body}` ?? ""
+                          : "Started a conversation"
+                      }
+                      image={
+                        conversation.users.find((user) => id !== user.id)
+                          ?.image ||
+                        (conversation?.isGroup && "/images/group.png") ||
+                        undefined
+                      }
+                      isSeen={
+                        conversation.messages[0]?.seenIds?.includes(id) ||
+                        !(conversation.messages.length > 0) ||
+                        false
+                      }
+                    />
+                  </button>
+                )
+              })}
             </div>
           ))}
         <div ref={ref} className="z-50 pt-24" />
@@ -246,21 +262,3 @@ const ConversationsMenu = () => {
 }
 
 export default ConversationsMenu
-
-// const createOrGetConversations = trpc.conversations.create.useMutation()
-
-// const onClick = async (otherUserId: string) => {
-//   const conversation = await createOrGetConversations.mutateAsync({
-//     users: [id, otherUserId],
-//   })
-//   router.push(`/conversations/${conversation.id}`)
-// }
-// if (createOrGetConversations.isPending)
-//   return (
-//     <div className="fixed inset-0 z-50 flex items-center justify-center bg-transparent/25 ">
-//       <div className="flex flex-col items-center justify-center space-y-4 rounded-md bg-white p-4 shadow-lg">
-//         <div className="h-12 w-12 animate-spin rounded-full border-4 border-gray-600"></div>
-//         <p className="text-gray-600">Creating conversation...</p>
-//       </div>
-//     </div>
-//   )

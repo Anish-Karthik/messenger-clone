@@ -1,4 +1,3 @@
-import { FullMessageType } from "@/types"
 import { Message } from "@prisma/client"
 import { z } from "zod"
 

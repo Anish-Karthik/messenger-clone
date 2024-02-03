@@ -10,6 +10,8 @@ import { pusherClient } from "@/lib/pusher"
 import { cn } from "@/lib/utils"
 import { trpc } from "@/app/_trpc/client"
 
+import UserAvatar from "../shared/user-avatar"
+
 const MessageChannel = ({
   currentUserId,
   conversationId,
@@ -143,11 +145,12 @@ const MessageChannel = ({
                 <p className="text-white">{item.body}</p>
               </div>
             )}
+
             <div className="relative -mt-3">
               <div
                 className={cn(
                   "absolute -top-2 flex w-full min-w-44 gap-1",
-                  currentUserId === item.senderId ? "right-12" : "left-12"
+                  currentUserId === item.senderId ? "right-14" : "left-12"
                 )}
               >
                 <p
@@ -160,16 +163,14 @@ const MessageChannel = ({
                 >
                   {item.sender.name}
                 </p>
-                <p className="min-w-12 text-xs text-gray-500">
+                <p className="min-w-14 text-xs text-gray-500">
                   {format(item.createdAt, "p")}
                 </p>
               </div>
-              <Image
-                src={item.sender.image || "/images/placeholder.jpg"}
-                alt="image"
-                height={30}
-                width={30}
-                className="rounded-full"
+              <UserAvatar
+                image={item.sender.image || "/images/placeholder.jpg"}
+                id={item.sender.id}
+                size={30}
               />
             </div>
           </div>

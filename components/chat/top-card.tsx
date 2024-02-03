@@ -1,10 +1,14 @@
 import Image from "next/image"
+import Link from "next/link"
 import { Conversation, User } from "@prisma/client"
-import { CircleEllipsisIcon, MenuIcon } from "lucide-react"
+import { ArrowLeft, CircleEllipsisIcon, MenuIcon } from "lucide-react"
 import { FaEllipsisH } from "react-icons/fa"
 
 import { cn } from "@/lib/utils"
 
+import Status from "../shared/status"
+import UserAvatar from "../shared/user-avatar"
+import { Button } from "../ui/button"
 import DetailsSheet from "./details-sheet"
 
 const TopCard = ({
@@ -27,27 +31,31 @@ const TopCard = ({
         className
       )}
     >
-      <div className="flex items-center gap-3 rounded-lg">
-        <div className="h-12 min-w-12">
-          <Image
-            src={
-              conversationDetail.isGroup
-                ? "/images/group.png"
-                : otherUserDetail?.image || "/images/placeholder.jpg"
-            }
-            alt="user"
-            height={45}
-            width={45}
-            className="rounded-full"
-          />
-        </div>
+      <div className="flex items-center gap-3 rounded-lg max-lg:-ml-4">
+        <Link href={"/conversations"} className="lg:hidden">
+          <Button variant={"ghost"}>
+            <ArrowLeft size={24} className="-mx-2" />
+          </Button>
+        </Link>
+        <UserAvatar
+          id={conversationDetail.isGroup ? "" : otherUserDetail?.id}
+          image={
+            conversationDetail.isGroup
+              ? "/images/group.png"
+              : otherUserDetail?.image || "/images/placeholder.jpg"
+          }
+        />
         <div className="flex w-full flex-col overflow-x-clip">
           <h1 className="text-md text-left font-normal">
             {conversationDetail.name || otherUserDetail?.name}
           </h1>
-          <p className="text-md -mt-1 truncate text-left font-light text-gray-500">
-            {"Offline"}
-          </p>
+          <Status
+            id={
+              conversationDetail.isGroup
+                ? undefined
+                : otherUserDetail?.id || undefined
+            }
+          />
         </div>
       </div>
       <div>
