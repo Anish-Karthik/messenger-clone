@@ -9,7 +9,7 @@ export default async function handler(
   response: NextApiResponse
 ) {
   const session = await auth()
-
+  console.log(session)
   if (!session?.user?.email) {
     return response.status(401)
   }

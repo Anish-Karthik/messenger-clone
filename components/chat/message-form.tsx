@@ -36,6 +36,7 @@ import { Input } from "@/components/ui/input"
 import { trpc } from "@/app/_trpc/client"
 
 import { Button } from "../ui/button"
+import axios from "axios"
 
 interface MessageFormProps extends React.HTMLAttributes<HTMLButtonElement> {
   senderId: string
@@ -52,22 +53,6 @@ const MessageForm: React.FC<MessageFormProps> = ({
   conversationId,
   ...props
 }) => {
-  const utils = trpc.useUtils()
-  const sendMessage = trpc.messages.create.useMutation({
-    // async onSuccess(data, variables, context) {
-    //   await utils.conversations.getAllMessages.cancel()
-    //   utils.conversations.getAllMessages.setData(
-    //     conversationId,
-    //     (current) => {
-    //       if (!current) return
-    //       return {
-    //         ...current,
-    //         messages: [...current.messages, data],
-    //       }
-    //     }
-    //   )
-    // },
-  })
   const [files, setFiles] = useState<File[]>([])
   const { startUpload } = useUploadThing("multipleFileUploader")
   const form = useForm<z.infer<typeof formSchema>>({
@@ -81,20 +66,22 @@ const MessageForm: React.FC<MessageFormProps> = ({
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
+      form.setValue('message', '', { shouldValidate: true });
+      form.reset();
       const tmp = files
       setFiles([])
       const imgRes = await startUpload(files)
       if (imgRes && imgRes[0]?.url) {
         values.files = imgRes.map((img) => img.url)
-      }
-      const message = await sendMessage.mutateAsync({
-        body: values.message,
+      }    
+      const message = await axios.post('/api/messages', {
+        message: values.message,
         images: values.files || [],
         conversationId,
         senderId,
       })
       console.log(message)
-      form.reset()
+      
       // utils.conversations.getAllMessages.setData(conversationId, (current) => {
       //   if (!current) return
       //   return {

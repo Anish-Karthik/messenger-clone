@@ -5,3 +5,5 @@ export const currentUser = async () => {
 
   return session?.user
 }
+
+export const getCurrentUser = currentUser
