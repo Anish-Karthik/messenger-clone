@@ -9,6 +9,7 @@ import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin"
 import { SessionProvider } from "next-auth/react"
 import { extractRouterConfig } from "uploadthing/server"
 
+import { SocketProvider } from "@/components/provider/socket-provider"
 import { ToastProvider } from "@/components/provider/toaster-provider"
 import { ourFileRouter } from "@/app/api/uploadthing/core"
 
@@ -33,7 +34,9 @@ export default async function RootLayout({
             <ToastProvider />
             <NextSSRPlugin routerConfig={extractRouterConfig(ourFileRouter)} />
             <ReactQueryDevtools initialIsOpen={false} />
-            <div className="h-full">{children}</div>
+            <SocketProvider>
+              <div className="h-full">{children}</div>
+            </SocketProvider>
           </body>
         </html>
       </TRPCProvider>

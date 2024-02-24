@@ -1,12 +1,14 @@
 "use client"
 
-import Image from "next/image"
+import { useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { Conversation, User } from "@prisma/client"
+import axios from "axios"
 import { format } from "date-fns"
 import { Trash2Icon } from "lucide-react"
 import toast from "react-hot-toast"
 
+import { useCurrentUser } from "@/hooks/use-current-user"
 import {
   Sheet,
   SheetContent,
@@ -15,7 +17,6 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet"
-import { trpc } from "@/app/_trpc/client"
 
 import Status from "../shared/status"
 import UserAvatar from "../shared/user-avatar"
@@ -29,18 +30,28 @@ const DetailsSheet = ({
   conversationDetail?: Conversation & { users: User[] }
   otherUserDetail?: User
 }) => {
+  const user = useCurrentUser()
   const router = useRouter()
-  const deleteConversation = trpc.conversations.delete.useMutation({
-    onSuccess(data, variables, context) {
-      console.log(data)
-      toast.success("Conversation deleted")
-      router.push("/conversations")
+  // const deleteConversation = trpc.conversations.delete.useMutation()
+  const handleDeleteConversation = useCallback(
+    async (id: string) => {
+      try {
+        //await deleteConversation.mutateAsync(id)
+        const res = await axios.delete(`/api/socket/conversations/${id}`, {
+          data: {
+            currentUserId: user?.id,
+          },
+        })
+        console.log(res)
+        toast.success("Conversation deleted")
+        router.push("/conversations")
+      } catch (error) {
+        console.log(error)
+        toast.error("Error deleting conversation")
+      }
     },
-    onError(data, variables, context) {
-      console.log(data)
-      toast.error("Error deleting conversation")
-    },
-  })
+    [router, user?.id]
+  )
   return (
     <Sheet>
       <SheetTrigger>
@@ -73,7 +84,7 @@ const DetailsSheet = ({
                 <button
                   className="mb-6 mt-4"
                   onClick={() =>
-                    deleteConversation.mutate(conversationDetail!.id)
+                    handleDeleteConversation(conversationDetail!.id)
                   }
                 >
                   <div className="rounded-full bg-gray-100 p-3 hover:opacity-80">

@@ -17,6 +17,7 @@ import * as z from "zod"
 
 import { cn } from "@/lib/utils"
 import { useUploadThing } from "@/lib/utils/uploadthing"
+import { useCurrentUser } from "@/hooks/use-current-user"
 import { Card, CardContent } from "@/components/ui/card"
 import {
   Carousel,
@@ -53,6 +54,7 @@ const MessageForm: React.FC<MessageFormProps> = ({
   conversationId,
   ...props
 }) => {
+  const user = useCurrentUser()
   const [files, setFiles] = useState<File[]>([])
   const { startUpload } = useUploadThing("multipleFileUploader")
   const form = useForm<z.infer<typeof formSchema>>({
@@ -74,22 +76,15 @@ const MessageForm: React.FC<MessageFormProps> = ({
       if (imgRes && imgRes[0]?.url) {
         values.files = imgRes.map((img) => img.url)
       }
-      const message = await axios.post("/api/messages", {
+      const message = await axios.post("/api/socket/messages", {
         message: values.message,
         images: values.files || [],
         conversationId,
         senderId,
+        currentUserId: user?.id,
       })
       console.log(message)
 
-      // utils.conversations.getAllMessages.setData(conversationId, (current) => {
-      //   if (!current) return
-      //   return {
-      //     ...current,
-      //     messages: [...current.messages, message],
-      //   }
-      // })
-      // sumbit form
       toast.success("Message sent")
     } catch (error) {
       console.log(error)

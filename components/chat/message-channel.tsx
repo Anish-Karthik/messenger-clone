@@ -1,15 +1,17 @@
 "use client"
 
-import React, { useEffect, useRef } from "react"
+import { useEffect, useRef } from "react"
 import Image from "next/image"
 import { FullMessageType } from "@/types"
+import axios from "axios"
 import { format } from "date-fns"
 import { find } from "lodash"
+import { ClipLoader } from "react-spinners"
 
-import { pusherClient } from "@/lib/pusher"
 import { cn } from "@/lib/utils"
 import { trpc } from "@/app/_trpc/client"
 
+import { useSocket } from "../provider/socket-provider"
 import UserAvatar from "../shared/user-avatar"
 
 const MessageChannel = ({
@@ -19,28 +21,38 @@ const MessageChannel = ({
   currentUserId: string
   conversationId: string
 }) => {
+  const { isConnected, socket } = useSocket()
   const utils = trpc.useUtils()
   const bottomRef = useRef<HTMLDivElement>(null)
-  const conversationDetail =
-    trpc.conversations.getAllMessages.useQuery(conversationId)
-  const setCurrentUserHasSeen = trpc.conversations.setSeen.useMutation()
+  const conversationDetail = trpc.conversations.getAllMessages.useQuery(
+    conversationId,
+    {
+      refetchInterval: isConnected ? false : 1000,
+    }
+  )
+  // const setCurrentUserHasSeen = trpc.conversations.setSeen.useMutation()
   console.log(conversationDetail?.data)
   useEffect(() => {
-    setCurrentUserHasSeen.mutateAsync({ conversationId, userId: currentUserId })
+    axios.post(`/api/socket/conversations/${conversationId}/seen`, {
+      currentUserId,
+    })
+    // setCurrentUserHasSeen.mutateAsync({ conversationId, userId: currentUserId })
   }, [conversationId, currentUserId])
 
   console.log("hi")
   useEffect(() => {
-    pusherClient.subscribe(conversationId)
+    // pusherClient.subscribe(conversationId)
     bottomRef?.current?.scrollIntoView()
-
+    if (!socket) return
     const messageHandler = async (message: FullMessageType) => {
       console.log(message)
-      setCurrentUserHasSeen.mutateAsync({
-        conversationId,
-        userId: currentUserId,
+      // setCurrentUserHasSeen.mutateAsync({
+      //   conversationId,
+      //   userId: currentUserId,
+      // })
+      axios.post(`/api/socket/conversations/${conversationId}/seen`, {
+        currentUserId,
       })
-      // axios.post(`/api/conversations/${conversationId}/seen`);
       await utils.conversations.getAllMessages.cancel()
       utils.conversations.getAllMessages.setData(conversationId, (current) => {
         console.log(current)
@@ -71,18 +83,36 @@ const MessageChannel = ({
         } as typeof current
       })
     }
-
-    pusherClient.bind("messages:new", messageHandler)
-    pusherClient.bind("message:update", updateMessageHandler)
-
+    // pusherClient.bind("messages:new", messageHandler)
+    // pusherClient.bind("message:update", updateMessageHandler)
+    socket.on(`conversation:${conversationId}:messages`, messageHandler)
+    socket.on(
+      `conversation:${conversationId}:messages:update`,
+      updateMessageHandler
+    )
     return () => {
-      pusherClient.unsubscribe(conversationId)
-      pusherClient.unbind("messages:new", messageHandler)
-      pusherClient.unbind("message:update", updateMessageHandler)
+      // pusherClient.unsubscribe(conversationId)
+      // pusherClient.unbind("messages:new", messageHandler)
+      // pusherClient.unbind("message:update", updateMessageHandler)
+      socket.off(`conversation:${conversationId}:messages`, messageHandler)
+      socket.off(
+        `conversation:${conversationId}:messages:update`,
+        updateMessageHandler
+      )
     }
-  }, [conversationId, currentUserId, setCurrentUserHasSeen])
+  }, [
+    conversationId,
+    currentUserId,
+    socket,
+    utils.conversations.getAllMessages,
+  ])
 
-  if (conversationDetail.isFetching) return <p>Loading...</p>
+  if (conversationDetail.isLoading)
+    return (
+      <div className="flex h-full w-full items-center justify-center">
+        <ClipLoader color="#3B82F6" />
+      </div>
+    )
   if (conversationDetail.error) return <p>{conversationDetail.error.message}</p>
   console.log(conversationDetail.data)
   return (

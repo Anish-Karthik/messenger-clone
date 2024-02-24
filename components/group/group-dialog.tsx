@@ -3,6 +3,7 @@
 import React from "react"
 import { useRouter } from "next/navigation"
 import { User } from "@prisma/client"
+import axios from "axios"
 import { FieldValues, useForm } from "react-hook-form"
 import { toast } from "react-hot-toast"
 
@@ -69,19 +70,30 @@ const GroupChatModal: React.FC<GroupChatModalProps> = ({ isOpen, onClose }) => {
       members: [],
     },
   })
-
+  const { isValid, isSubmitting } = form.formState
   const members = form.watch("members")
   async function onSubmit(values: FieldValues) {
     console.log(values)
-    const res = await createGroupChat.mutateAsync({
-      name: values.name,
-      users: [...values.members.map((user: any) => user.value), currUser?.id],
-      isGroup: true,
-    })
-    toast.success("Group chat created successfully")
-    console.log(res)
-    form.reset()
-    onClose()
+    // const res = await createGroupChat.mutateAsync({
+    //   name: values.name,
+    //   users: [...values.members.map((user: any) => user.value), currUser?.id],
+    //   isGroup: true,
+    // })
+    try {
+      const res = await axios.post("/api/socket/conversations", {
+        name: values.name,
+        members: values.members,
+        isGroup: true,
+        currentUserId: currUser?.id,
+      })
+      toast.success("Group chat created successfully")
+      console.log(res)
+      form.reset()
+      onClose()
+    } catch (error) {
+      console.log(error)
+      toast.error("Error creating group chat")
+    }
   }
 
   return (
@@ -152,7 +164,11 @@ const GroupChatModal: React.FC<GroupChatModalProps> = ({ isOpen, onClose }) => {
               >
                 Cancel
               </Button>
-              <Button type="submit" className="bg-sky-500">
+              <Button
+                type="submit"
+                className="bg-sky-500"
+                disabled={isSubmitting}
+              >
                 Create
               </Button>
             </div>

@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils"
 
 import Status from "../shared/status"
 import UserAvatar from "../shared/user-avatar"
+import { SocketIndicator } from "../socket-indicator"
 import { Button } from "../ui/button"
 import DetailsSheet from "./details-sheet"
 
@@ -58,7 +59,8 @@ const TopCard = ({
           />
         </div>
       </div>
-      <div>
+      <div className="flex items-center gap-4">
+        <SocketIndicator />
         {conversationDetail.isGroup ? (
           <DetailsSheet conversationDetail={conversationDetail} />
         ) : (

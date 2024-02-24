@@ -27,8 +27,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children }) => {
             className="
               fixed 
               inset-0 
-              bg-gray-500 
-              bg-opacity-75 
+              bg-gray-500/75 
               transition-opacity
             "
           />

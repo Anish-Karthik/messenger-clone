@@ -10,19 +10,20 @@ import { format } from "date-fns"
 import { find } from "lodash"
 import { useInView } from "react-intersection-observer"
 
-import { pusherClient } from "@/lib/pusher"
+// import { pusherClient } from "@/lib/pusher"
 import { useCurrentUser } from "@/hooks/use-current-user"
 import { trpc } from "@/app/_trpc/client"
 
 import GroupChatModal from "../group/group-dialog"
+import { useSocket } from "../provider/socket-provider"
 import UserCard from "./user-card"
 
 const ConversationsMenu = () => {
+  const { socket } = useSocket()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const utils = trpc.useUtils()
   const id = useAuthUser((state) => state.id)
   const currUser = useCurrentUser()
-  console.log(id)
   const router = useRouter()
   const {
     data,
@@ -32,14 +33,15 @@ const ConversationsMenu = () => {
     fetchPreviousPage,
   } = trpc.users.getAllConversations.useInfiniteQuery(
     {
-      limit: 5,
+      limit: 20,
       userId: id,
     },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
+      gcTime: 4000,
     }
   )
-  const pusherKey = useMemo(() => currUser?.id, [currUser?.id])
+  // const pusherKey = useMemo(() => currUser?.id, [currUser?.id])
   const { inView, ref } = useInView()
   console.log(inView)
   useEffect(() => {
@@ -53,75 +55,79 @@ const ConversationsMenu = () => {
   }, [inView, hasNextPage, fetchNextPage, fetchPreviousPage, ref])
 
   useEffect(() => {
-    if (!pusherKey) return
+    // if (!pusherKey) return
 
-    pusherClient.subscribe(pusherKey)
-
+    // pusherClient.subscribe(pusherKey)
+    if (!socket) return
     const newHandler = async (conversation: FullConversationType) => {
       console.log(conversation)
-      await utils.users.getAllConversations.cancel()
-      utils.users.getAllConversations.setInfiniteData(
-        {
-          userId: id,
-          limit: 10,
-        },
-        // @ts-ignore
-        (data) => {
-          if (!data) {
-            console.log("no data")
-            return {
-              pages: [],
-              pageParams: [],
-            }
-          }
-          if (
-            find(data.pages, (page) =>
-              page?.items?.find((item) => item.id === conversation.id)
-            )
-          ) {
-            return data
-          }
-          console.log("hi")
-          const newPages = data.pages.map((page, i) => ({
-            ...page,
-            items:
-              i === 0 && page.items
-                ? [conversation, ...page.items]
-                : page.items,
-          }))
-          return {
-            ...data,
-            pages: newPages,
-          }
-        }
-      )
+      await utils.users.getAllConversations.invalidate()
+      // await utils.users.getAllConversations.cancel()
+      // utils.users.getAllConversations.setInfiniteData(
+      //   {
+      //     userId: id,
+      //     limit: 10,
+      //   },
+      //   // @ts-ignore
+      //   (data) => {
+      //     if (!data) {
+      //       console.log("no data")
+      //       return {
+      //         pages: [],
+      //         pageParams: [],
+      //       }
+      //     }
+      //     if (
+      //       find(data.pages, (page) =>
+      //         page?.items?.find((item) => item.id === conversation.id)
+      //       )
+      //     ) {
+      //       return data
+      //     }
+      //     console.log("hi")
+      //     const newPages = data.pages.map((page, i) => ({
+      //       ...page,
+      //       items:
+      //         i === 0 && page.items
+      //           ? [conversation, ...page.items]
+      //           : page.items,
+      //     }))
+      //     return {
+      //       ...data,
+      //       pages: newPages,
+      //     }
+      //   }
+      // )
     }
 
     const removeHandler = async (conversationId: string) => {
-      await utils.users.getAllConversations.cancel()
-      utils.users.getAllConversations.setInfiniteData(
-        {
-          userId: id,
-          limit: 10,
-        },
-        (data) => {
-          if (!data) {
-            console.log("no data")
-            return {
-              pages: [],
-              pageParams: [],
-            }
-          }
-          const newPages = data.pages.map((page) => ({
-            ...page,
-            items: page.items.filter((item) => item.id !== conversationId),
-          }))
-          return {
-            ...data,
-            pages: newPages,
-          }
-        }
-      )
+      console.log("remove", conversationId)
+      await utils.users.getAllConversations.invalidate()
+      // await utils.users.getAllConversations.cancel()
+      // utils.users.getAllConversations.setInfiniteData(
+      //   {
+      //     userId: id,
+      //     limit: 20,
+      //   },
+      //   (data) => {
+      //     console.log(data)
+      //     if (!data) {
+      //       console.log("no data")
+      //       return {
+      //         pages: [],
+      //         pageParams: [],
+      //       }
+      //     }
+      //     const newPages = data.pages.map((page) => ({
+      //       ...page,
+      //       items: page.items.filter((item) => item.id !== conversationId),
+      //     }))
+      //     return {
+      //       ...data,
+      //       pages: newPages,
+      //     }
+      //   }
+      // )
     }
 
     const updateHandler = async ({
@@ -131,46 +137,54 @@ const ConversationsMenu = () => {
       id: string
       messages: Message[]
     }) => {
-      await utils.users.getAllConversations.cancel()
-      utils.users.getAllConversations.setInfiniteData(
-        {
-          userId: id,
-          limit: 10,
-        },
-        // @ts-ignore
-        (data) => {
-          if (!data) {
-            console.log("no data")
-            return {
-              pages: [],
-              pageParams: [],
-            }
-          }
-          const newPages = data.pages.map((page) => ({
-            ...page,
-            items: page.items.map((item) =>
-              item.id === id ? { ...item, messages } : item
-            ),
-          }))
-          return {
-            ...data,
-            pages: newPages,
-          }
-        }
-      )
+      await utils.users.getAllConversations.invalidate()
+      // await utils.users.getAllConversations.cancel()
+      // utils.users.getAllConversations.setInfiniteData(
+      //   {
+      //     userId: id,
+      //     limit: 10,
+      //   },
+      //   // @ts-ignore
+      //   (data) => {
+      //     if (!data) {
+      //       console.log("no data")
+      //       return {
+      //         pages: [],
+      //         pageParams: [],
+      //       }
+      //     }
+      //     const newPages = data.pages.map((page) => ({
+      //       ...page,
+      //       items: page.items.map((item) =>
+      //         item.id === id ? { ...item, messages } : item
+      //       ),
+      //     }))
+      //     return {
+      //       ...data,
+      //       pages: newPages,
+      //     }
+      //   }
+      // )
     }
 
-    pusherClient.bind("conversation:new", newHandler)
-    pusherClient.bind("conversation:remove", removeHandler)
-    pusherClient.bind("conversation:update", updateHandler)
+    // pusherClient.bind("conversation:new", newHandler)
+    // pusherClient.bind("conversation:remove", removeHandler)
+    // pusherClient.bind("conversation:update", updateHandler)
+
+    socket.on(`conversation:user:${currUser?.id}:new`, newHandler)
+    socket.on(`conversation:user:${currUser?.id}:remove`, removeHandler)
+    socket.on(`conversation:user:${currUser?.id}:update`, updateHandler)
 
     return () => {
-      pusherClient.unsubscribe(pusherKey)
-      pusherClient.unbind("conversation:new", newHandler)
-      pusherClient.unbind("conversation:remove", removeHandler)
-      pusherClient.unbind("conversation:update", updateHandler)
+      // pusherClient.unsubscribe(pusherKey)
+      // pusherClient.unbind("conversation:new", newHandler)
+      // pusherClient.unbind("conversation:remove", removeHandler)
+      // pusherClient.unbind("conversation:update", updateHandler)
+      socket.off(`conversation:user:${currUser?.id}:new`, newHandler)
+      socket.off(`conversation:user:${currUser?.id}:remove`, removeHandler)
+      socket.off(`conversation:user:${currUser?.id}:update`, updateHandler)
     }
-  }, [id, pusherKey, utils.users.getAllConversations])
+  }, [currUser?.id, id, socket, utils.users.getAllConversations])
   console.log(data)
   return (
     <div className="h-full w-full pb-12">
@@ -239,10 +253,12 @@ const ConversationsMenu = () => {
                           : "Started a conversation"
                       }
                       image={
-                        conversation.users.find((user) => id !== user.id)
-                          ?.image ||
-                        (conversation?.isGroup && "/images/group.png") ||
-                        undefined
+                        conversation.isGroup ||
+                        conversation.name ||
+                        conversation.userIds.length > 2
+                          ? "/images/group.png"
+                          : conversation.users.find((user) => id !== user.id)
+                              ?.image || "/images/placeholder.jpg"
                       }
                       isSeen={
                         conversation.messages[0]?.seenIds?.includes(id) ||

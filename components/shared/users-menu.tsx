@@ -3,6 +3,9 @@
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useAuthUser } from "@/store/zustand"
+import axios from "axios"
+import { Conversation } from "prisma/prisma-client"
+import toast from "react-hot-toast"
 import { useInView } from "react-intersection-observer"
 
 import { trpc } from "@/app/_trpc/client"
@@ -69,10 +72,18 @@ const UsersMenu = () => {
   }, [inView, hasNextPage, fetchNextPage, fetchPreviousPage])
 
   const onClick = async (otherUserId: string) => {
-    const conversation = await createOrGetConversations.mutateAsync({
-      users: [id, otherUserId],
-    })
-    router.push(`/conversations/${conversation.id}`)
+    // const conversation = await createOrGetConversations.mutateAsync({
+    //   users: [id, otherUserId],
+    // })
+    try {
+      const conversation = (await axios.post("/api/socket/conversations", {
+        userId: otherUserId,
+        currentUserId: id,
+      })) as Conversation
+      router.push(`/conversations/${conversation.id}`)
+    } catch (error) {
+      toast.error("Something went wrong")
+    }
   }
   if (createOrGetConversations.isPending)
     return (

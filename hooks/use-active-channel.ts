@@ -40,3 +40,48 @@ const useActiveChannel = () => {
 }
 
 export default useActiveChannel
+
+// import { useEffect, useState } from "react"
+// import { useActiveList } from "@/store/zustand"
+// import { Channel, Members } from "pusher-js"
+// import { pusherClient } from "@/lib/pusher"
+// import { useSocket } from "@/components/provider/socket-provider"
+// import { io, Socket } from "socket.io-client"
+
+// const useActiveChannel = () => {
+//   const { set, add, remove } = useActiveList()
+//   const [activeChannel, setActiveChannel] = useState<Socket | null>(null)
+
+//   useEffect(() => {
+//     let socket = activeChannel
+//     if (!socket) {
+//       socket = io("http://localhost:3000")
+//       setActiveChannel(socket)
+//     }
+
+//     socket.on("connect", () => {
+//       socket?.emit("join", "presence-messenger")
+//     })
+
+//     socket.on("pusher:subscription_succeeded", (members: string[]) => {
+//       set(members)
+//     })
+
+//     socket.on("pusher:member_added", (member: string) => {
+//       add(member)
+//     })
+
+//     socket.on("pusher:member_removed", (member: string) => {
+//       remove(member)
+//     })
+
+//     return () => {
+//       if (activeChannel) {
+//         socket?.disconnect()
+//         setActiveChannel(null)
+//       }
+//     }
+//   }, [activeChannel, add, remove, set])
+// }
+
+// export default useActiveChannel
