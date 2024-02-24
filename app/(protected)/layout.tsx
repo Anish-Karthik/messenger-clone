@@ -12,7 +12,9 @@ export default async function RootLayout({
 }) {
   const user = await currentUser()
   if (!user) {
-    redirect("/auth/login")
+    return <div>
+      Not logged in
+    </div>
   }
   return (
     <html lang="en">

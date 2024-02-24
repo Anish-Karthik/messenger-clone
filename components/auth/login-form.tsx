@@ -25,7 +25,7 @@ import { FormSuccess } from "@/components/form-success"
 
 export const LoginForm = () => {
   const searchParams = useSearchParams()!
-  const callbackUrl = searchParams.get("callbackUrl")
+  const callbackUrl = searchParams.get("callbackUrl") || "/conversations"
   const urlError =
     searchParams.get("error") === "OAuthAccountNotLinked"
       ? "Email already in use with different provider!"
