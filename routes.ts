@@ -10,6 +10,7 @@ export const publicRoutes = [
   "/api/trpc",
   "/test",
   "/api/socket",
+  "/api/auth",
 ]
 
 /**

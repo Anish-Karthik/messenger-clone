@@ -1,11 +1,9 @@
 import { redirect } from "next/navigation"
-import axios from "axios"
-import { debounce } from "lodash"
 
-import { currentUser } from "@/lib/auth"
 import BottomBar from "@/components/navigation/bottom-bar"
 import SideBar from "@/components/navigation/side-bar"
 import SideBarContent from "@/components/navigation/side-bar-content"
+import { currentUser } from "@/lib/auth"
 
 export default async function RootLayout({
   children,
