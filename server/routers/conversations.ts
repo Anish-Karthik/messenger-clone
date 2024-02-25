@@ -1,4 +1,4 @@
-import { FullConversationType } from "@/types"
+import { FullConversationType, FullMessageType } from "@/types"
 import { z } from "zod"
 
 import { db } from "@/lib/db"
@@ -109,19 +109,45 @@ export const conversationsRouter = router({
   }),
 
   getAllMessages: publicProcedure
-    .input(z.string())
-    .query(async ({ input: id }) => {
-      return await db.conversation.findUnique({
-        where: { id },
-        include: {
-          messages: {
-            include: {
-              sender: true,
-              seen: true,
-            },
-          },
-        },
+    .input(
+      z.object({
+        conversationId: z.string(),
+        limit: z.number().min(1).max(100).nullish().default(50),
+        cursor: z.string().nullish(),
       })
+    )
+    .query(async ({ input: { conversationId, limit, cursor } }) => {
+      const items: FullMessageType[] = (await db.conversation
+        .findUnique({ where: { id: conversationId } })
+        .messages({
+          take: limit! + 1,
+          cursor: cursor ? { id: cursor } : undefined,
+          // include last message from the messages list also
+          include: {
+            sender: true,
+            seen: true,
+          },
+          orderBy: {
+            createdAt: "desc",
+          },
+        }))!
+      console.log(items)
+      let nextCursor: typeof cursor | undefined = undefined
+      if (items && items.length > limit!) {
+        const nextItem = items.pop()
+        nextCursor = nextItem!.id
+      }
+      let prevCursor: typeof cursor | undefined = undefined
+      if (items && items.length >= limit!) {
+        const prevItem = items[0]
+        console.log(prevItem?.body)
+        prevCursor = prevItem!.id
+      }
+      return {
+        items,
+        // prevCursor,
+        nextCursor,
+      }
     }),
 
   setSeen: publicProcedure
