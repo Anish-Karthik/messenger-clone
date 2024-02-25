@@ -14,7 +14,7 @@ export default async function RootLayout({
 }) {
   const user = await currentUser()
   if (!user) {
-    return redirect("/auth/login")
+    return redirect("/")
   }
 
   return (
