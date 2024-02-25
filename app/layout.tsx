@@ -5,6 +5,7 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
 import TRPCProvider from "./_trpc/Provider"
 import "./globals.css"
 import { auth } from "@/auth"
+import { NextUIProvider } from "@nextui-org/react"
 import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin"
 import { SessionProvider } from "next-auth/react"
 import { extractRouterConfig } from "uploadthing/server"
@@ -33,10 +34,15 @@ export default async function RootLayout({
           <body className={inter.className}>
             <ToastProvider />
             <NextSSRPlugin routerConfig={extractRouterConfig(ourFileRouter)} />
-            <ReactQueryDevtools initialIsOpen={false} />
-            <SocketProvider>
-              <div className="h-full">{children}</div>
-            </SocketProvider>
+            <ReactQueryDevtools
+              initialIsOpen={true}
+              buttonPosition="bottom-left"
+            />
+            <NextUIProvider>
+              <SocketProvider>
+                <div className="h-full">{children}</div>
+              </SocketProvider>
+            </NextUIProvider>
           </body>
         </html>
       </TRPCProvider>

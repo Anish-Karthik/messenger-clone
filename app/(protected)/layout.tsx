@@ -12,20 +12,16 @@ export default async function RootLayout({
 }) {
   const user = await currentUser()
   if (!user) {
-    return <div>
-      Not logged in
-    </div>
+    return redirect("/auth/login")
   }
   return (
-    <html lang="en">
-      <main>
-        <SideBar user={user} />
-        <SideBarContent className="absolute inset-y-0 ml-20 w-80 max-lg:hidden" />
-        <div className="absolute inset-y-0 max-lg:inset-x-0 max-lg:bottom-16 max-lg:h-full lg:left-[25rem] lg:right-0">
-          {children}
-        </div>
-        <BottomBar />
-      </main>
-    </html>
+    <main>
+      <SideBar user={user} />
+      <SideBarContent className="absolute inset-y-0 ml-20 w-80 max-lg:hidden" />
+      <div className="absolute inset-y-0 max-lg:inset-x-0 max-lg:bottom-16 max-lg:h-full lg:left-[25rem] lg:right-0">
+        {children}
+      </div>
+      <BottomBar />
+    </main>
   )
 }

@@ -40,7 +40,7 @@ export default async function handler(
     const lastMessage = conversation.messages[conversation.messages.length - 1]
 
     if (!lastMessage) {
-      return res.status(404).json({ error: "Not Found" })
+      return res.status(200).json({ error: "Not Found" })
     }
 
     // Update seen of last message

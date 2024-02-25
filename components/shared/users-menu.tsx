@@ -10,6 +10,7 @@ import { useInView } from "react-intersection-observer"
 
 import { trpc } from "@/app/_trpc/client"
 
+import { Skeleton } from "../ui/skeleton"
 import UserCard from "./user-card"
 
 const UsersMenu = () => {
@@ -17,37 +18,10 @@ const UsersMenu = () => {
   const router = useRouter()
   const id = useAuthUser((state) => state.id)
   console.log(id)
-  const createOrGetConversations = trpc.conversations.create.useMutation({
-    async onSuccess(newData, variables, context) {
-      // await utils.users.getAllConversations.cancel()
-      // utils.users.getAllConversations.setInfiniteData(
-      //   {
-      //     userId: id,
-      //     limit: 10,
-      //   },
-      //   (data) => {
-      //     if (!data) {
-      //       console.log("no data")
-      //       return {
-      //         pages: [],
-      //         pageParams: [],
-      //       }
-      //     }
-      //     const newPages = data.pages.map((page, i) => ({
-      //       ...page,
-      //       items:
-      //         i === 0 && page.items ? [newData, ...page.items] : page.items,
-      //     }))
-      //     return {
-      //       ...data,
-      //       pages: newPages,
-      //     }
-      //   }
-      // )
-    },
-  })
+
   const {
     data,
+    isLoading,
     hasNextPage,
     fetchNextPage,
     isFetchingNextPage,
@@ -72,35 +46,25 @@ const UsersMenu = () => {
   }, [inView, hasNextPage, fetchNextPage, fetchPreviousPage])
 
   const onClick = async (otherUserId: string) => {
-    // const conversation = await createOrGetConversations.mutateAsync({
-    //   users: [id, otherUserId],
-    // })
     try {
-      const conversation = (await axios.post("/api/socket/conversations", {
+      const conversation = await axios.post("/api/socket/conversations", {
         userId: otherUserId,
         currentUserId: id,
-      })) as Conversation
-      router.push(`/conversations/${conversation.id}`)
+      })
+      console.log(conversation)
+      // @ts-ignore
+      router.push(`/conversations/${conversation.data.id}`)
     } catch (error) {
       toast.error("Something went wrong")
     }
   }
-  if (createOrGetConversations.isPending)
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-transparent/25 ">
-        <div className="flex flex-col items-center justify-center space-y-4 rounded-md bg-white p-4 shadow-lg">
-          <div className="h-12 w-12 animate-spin rounded-full border-4 border-gray-600"></div>
-          <p className="text-gray-600">Creating conversation...</p>
-        </div>
-      </div>
-    )
   return (
-    <div className="h-full w-full pb-12">
+    <div className="h-full w-full">
       <div className="mb-4 flex justify-between">
         <h1 className="text-2xl font-bold">People</h1>
       </div>
 
-      <div className="h-[90%] overflow-y-auto">
+      <div className="h-[95%] overflow-y-auto">
         {data &&
           data.pages?.flatMap((page, i) => (
             <div
@@ -118,7 +82,17 @@ const UsersMenu = () => {
               ))}
             </div>
           ))}
-        <div ref={ref} className="pt-24" />
+        {(isFetchingNextPage || isLoading) &&
+          new Array(10).map((_, i) => (
+            <div key={i} className="flex items-center space-x-4">
+              <Skeleton className="h-12 w-12 rounded-full" />
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-[250px]" />
+                <Skeleton className="h-4 w-[200px]" />
+              </div>
+            </div>
+          ))}
+        <div ref={ref} className="" />
       </div>
     </div>
   )

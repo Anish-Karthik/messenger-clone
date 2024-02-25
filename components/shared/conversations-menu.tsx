@@ -16,6 +16,7 @@ import { trpc } from "@/app/_trpc/client"
 
 import GroupChatModal from "../group/group-dialog"
 import { useSocket } from "../provider/socket-provider"
+import { Skeleton } from "../ui/skeleton"
 import UserCard from "./user-card"
 
 const ConversationsMenu = () => {
@@ -30,6 +31,7 @@ const ConversationsMenu = () => {
     hasNextPage,
     fetchNextPage,
     isFetchingNextPage,
+    isLoading,
     fetchPreviousPage,
   } = trpc.users.getAllConversations.useInfiniteQuery(
     {
@@ -62,72 +64,11 @@ const ConversationsMenu = () => {
     const newHandler = async (conversation: FullConversationType) => {
       console.log(conversation)
       await utils.users.getAllConversations.invalidate()
-      // await utils.users.getAllConversations.cancel()
-      // utils.users.getAllConversations.setInfiniteData(
-      //   {
-      //     userId: id,
-      //     limit: 10,
-      //   },
-      //   // @ts-ignore
-      //   (data) => {
-      //     if (!data) {
-      //       console.log("no data")
-      //       return {
-      //         pages: [],
-      //         pageParams: [],
-      //       }
-      //     }
-      //     if (
-      //       find(data.pages, (page) =>
-      //         page?.items?.find((item) => item.id === conversation.id)
-      //       )
-      //     ) {
-      //       return data
-      //     }
-      //     console.log("hi")
-      //     const newPages = data.pages.map((page, i) => ({
-      //       ...page,
-      //       items:
-      //         i === 0 && page.items
-      //           ? [conversation, ...page.items]
-      //           : page.items,
-      //     }))
-      //     return {
-      //       ...data,
-      //       pages: newPages,
-      //     }
-      //   }
-      // )
     }
 
     const removeHandler = async (conversationId: string) => {
       console.log("remove", conversationId)
       await utils.users.getAllConversations.invalidate()
-      // await utils.users.getAllConversations.cancel()
-      // utils.users.getAllConversations.setInfiniteData(
-      //   {
-      //     userId: id,
-      //     limit: 20,
-      //   },
-      //   (data) => {
-      //     console.log(data)
-      //     if (!data) {
-      //       console.log("no data")
-      //       return {
-      //         pages: [],
-      //         pageParams: [],
-      //       }
-      //     }
-      //     const newPages = data.pages.map((page) => ({
-      //       ...page,
-      //       items: page.items.filter((item) => item.id !== conversationId),
-      //     }))
-      //     return {
-      //       ...data,
-      //       pages: newPages,
-      //     }
-      //   }
-      // )
     }
 
     const updateHandler = async ({
@@ -138,48 +79,11 @@ const ConversationsMenu = () => {
       messages: Message[]
     }) => {
       await utils.users.getAllConversations.invalidate()
-      // await utils.users.getAllConversations.cancel()
-      // utils.users.getAllConversations.setInfiniteData(
-      //   {
-      //     userId: id,
-      //     limit: 10,
-      //   },
-      //   // @ts-ignore
-      //   (data) => {
-      //     if (!data) {
-      //       console.log("no data")
-      //       return {
-      //         pages: [],
-      //         pageParams: [],
-      //       }
-      //     }
-      //     const newPages = data.pages.map((page) => ({
-      //       ...page,
-      //       items: page.items.map((item) =>
-      //         item.id === id ? { ...item, messages } : item
-      //       ),
-      //     }))
-      //     return {
-      //       ...data,
-      //       pages: newPages,
-      //     }
-      //   }
-      // )
     }
-
-    // pusherClient.bind("conversation:new", newHandler)
-    // pusherClient.bind("conversation:remove", removeHandler)
-    // pusherClient.bind("conversation:update", updateHandler)
-
     socket.on(`conversation:user:${currUser?.id}:new`, newHandler)
     socket.on(`conversation:user:${currUser?.id}:remove`, removeHandler)
     socket.on(`conversation:user:${currUser?.id}:update`, updateHandler)
-
     return () => {
-      // pusherClient.unsubscribe(pusherKey)
-      // pusherClient.unbind("conversation:new", newHandler)
-      // pusherClient.unbind("conversation:remove", removeHandler)
-      // pusherClient.unbind("conversation:update", updateHandler)
       socket.off(`conversation:user:${currUser?.id}:new`, newHandler)
       socket.off(`conversation:user:${currUser?.id}:remove`, removeHandler)
       socket.off(`conversation:user:${currUser?.id}:update`, updateHandler)
@@ -187,7 +91,7 @@ const ConversationsMenu = () => {
   }, [currUser?.id, id, socket, utils.users.getAllConversations])
   console.log(data)
   return (
-    <div className="h-full w-full pb-12">
+    <div className="h-full w-full">
       <div className="mb-4 flex justify-between">
         <h1 className="text-2xl font-bold">Messages</h1>
         <GroupChatModal
@@ -206,7 +110,7 @@ const ConversationsMenu = () => {
           />
         </button>
       </div>
-      <div className="h-[90%] overflow-y-auto">
+      <div className="h-[95%] overflow-y-auto">
         {data &&
           data.pages?.flatMap((page, i) => (
             <div
@@ -271,7 +175,17 @@ const ConversationsMenu = () => {
               })}
             </div>
           ))}
-        <div ref={ref} className="z-50 pt-24" />
+        {(isFetchingNextPage || isLoading) &&
+          new Array(10).map((_, i) => (
+            <div key={i} className="flex items-center space-x-4">
+              <Skeleton className="h-12 w-12 rounded-full" />
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-[250px]" />
+                <Skeleton className="h-4 w-[200px]" />
+              </div>
+            </div>
+          ))}
+        <div ref={ref} className="z-50 " />
       </div>
     </div>
   )
