@@ -11,13 +11,11 @@ const UserAvatar = ({
   id,
   size,
 }: {
-  image?: string
+  image?: string | null
   id?: string
   size?: number
 }) => {
-  const { members } = useActiveList()
-  console.log(members)
-  const isActive = useMemo(() => members.includes(id || ""), [members, id])
+  const { isActive } = useActiveList()
   return (
     <div className={cn("relative", !size ?? "h-12 min-w-12")}>
       <Image
@@ -27,7 +25,7 @@ const UserAvatar = ({
         width={size || 45}
         className="rounded-full bg-gray-200/70"
       />
-      {isActive ? (
+      {isActive(id || "") ? (
         <span
           className="
             absolute 

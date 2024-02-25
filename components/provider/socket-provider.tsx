@@ -1,7 +1,10 @@
 "use client"
 
 import { createContext, useContext, useEffect, useState } from "react"
+import axios from "axios"
 import { io as ClientIO } from "socket.io-client"
+
+import { useCurrentUser } from "@/hooks/use-current-user"
 
 type SocketContextType = {
   socket: any | null
@@ -18,6 +21,7 @@ export const useSocket = () => {
 }
 
 export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
+  const currentUser = useCurrentUser()
   const [socket, setSocket] = useState(null)
   const [isConnected, setIsConnected] = useState(false)
 
@@ -31,10 +35,16 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     )
 
     socketInstance.on("connect", () => {
+      if (currentUser) {
+        axios.post("/api/socket/join", { currentUserId: currentUser.id })
+      }
       setIsConnected(true)
     })
 
     socketInstance.on("disconnect", () => {
+      if (currentUser) {
+        axios.post("/api/socket/leave", { currentUserId: currentUser.id })
+      }
       setIsConnected(false)
     })
 

@@ -16,6 +16,7 @@ export default async function handler(
     if (!currentUserId) {
       return res.status(401).json({ error: "Unauthorized" })
     }
+    res?.socket?.server?.io?.emit("user:join", currentUserId)
 
     // Find existing conversation
     const conversation = await db.conversation.findUnique({

@@ -3,11 +3,14 @@
 import { useEffect, useState } from "react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
-import { useAuthUser } from "@/store/zustand"
+import { useActiveList, useAuthUser } from "@/store/zustand"
 import { FullConversationType } from "@/types"
 import { Message } from "@prisma/client"
+import axios from "axios"
 import { format } from "date-fns"
+import { debounce } from "lodash"
 import { useInView } from "react-intersection-observer"
+import { io } from "socket.io-client"
 
 import { useCurrentUser } from "@/hooks/use-current-user"
 import { trpc } from "@/app/_trpc/client"
@@ -18,6 +21,7 @@ import { Skeleton } from "../ui/skeleton"
 import UserCard from "./user-card"
 
 const ConversationsMenu = () => {
+  const { add, remove } = useActiveList()
   const { socket } = useSocket()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const utils = trpc.useUtils()
@@ -53,6 +57,27 @@ const ConversationsMenu = () => {
 
   useEffect(() => {
     if (!socket) return
+    if (!currUser) return
+    console.log(socket)
+
+    socket?.on("user:join", (userId: string) => {
+      add(userId)
+      console.log(userId)
+    })
+    socket?.on("user:leave", (userId: string) => {
+      remove(userId)
+      console.log(userId)
+    })
+
+    return () => {
+      socket?.off("user:join")
+      socket?.off("user:leave")
+    }
+  }, [add, currUser, remove, socket])
+
+  useEffect(() => {
+    if (!socket) return
+
     const newHandler = async (conversation: FullConversationType) => {
       console.log(conversation)
       await utils.users.getAllConversations.invalidate()
@@ -120,11 +145,18 @@ const ConversationsMenu = () => {
                   >
                     <UserCard
                       key={conversation.id}
-                      id={conversation.id}
+                      id={
+                        conversation.isGroup
+                          ? conversation.id
+                          : conversation.users.find(
+                              (user) => currUser?.id !== user.id
+                            )!.id
+                      }
                       name={
                         conversation.name ??
-                        conversation.users.find((user) => id !== user.id)
-                          ?.name ??
+                        conversation.users.find(
+                          (user) => currUser?.id !== user.id
+                        )?.name ??
                         ""
                       }
                       lastMessageTime={format(
@@ -134,7 +166,7 @@ const ConversationsMenu = () => {
                       message={
                         conversation.messages.length > 0
                           ? `${
-                              conversation.messages[0].senderId === id
+                              conversation.messages[0].senderId === currUser?.id
                                 ? "you: "
                                 : conversation.messages[0]?.sender?.name +
                                     ": " || ""
@@ -146,11 +178,14 @@ const ConversationsMenu = () => {
                         conversation.name ||
                         conversation.userIds.length > 2
                           ? "/images/group.png"
-                          : conversation.users.find((user) => id !== user.id)
-                              ?.image || "/images/placeholder.jpg"
+                          : conversation.users.find(
+                              (user) => currUser?.id !== user.id
+                            )?.image || "/images/placeholder.jpg"
                       }
                       isSeen={
-                        conversation.messages[0]?.seenIds?.includes(id) ||
+                        conversation.messages[0]?.seenIds?.includes(
+                          currUser?.id || ""
+                        ) ||
                         !(conversation.messages.length > 0) ||
                         false
                       }

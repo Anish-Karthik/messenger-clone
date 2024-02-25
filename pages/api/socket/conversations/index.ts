@@ -19,6 +19,7 @@ export default async function handler(
     if (!currentUserId) {
       return res.status(401).json({ error: "Unauthorized" })
     }
+    res?.socket?.server?.io?.emit("user:join", currentUserId)
 
     if (isGroup && (!members || members.length < 2 || !name)) {
       return res.status(400).json({ error: "Invalid Data" })

@@ -72,7 +72,9 @@ const MessageForm: React.FC<MessageFormProps> = ({
       form.reset()
       const tmp = files
       setFiles([])
-      const imgRes = await startUpload(files)
+      const start = performance.now()
+      console.log(start)
+      const imgRes = files.length > 0 ? await startUpload(files) : null
       if (imgRes && imgRes[0]?.url) {
         values.files = imgRes.map((img) => img.url)
       }
@@ -83,6 +85,8 @@ const MessageForm: React.FC<MessageFormProps> = ({
         senderId,
         currentUserId: user?.id,
       })
+      const end = performance.now()
+      console.log(end - start)
       console.log(message)
 
       toast.success("Message sent")

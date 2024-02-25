@@ -19,6 +19,7 @@ export default async function handler(
       console.log(currentUserId)
       return res.status(401).json({ error: "Unauthorized" })
     }
+    res?.socket?.server?.io?.emit("user:join", currentUserId)
 
     const newMessage = await db.message.create({
       include: {

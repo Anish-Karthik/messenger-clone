@@ -30,7 +30,13 @@ interface ActiveListStore {
 
 export const useActiveList = create<ActiveListStore>((set, get) => ({
   members: [],
-  add: (id) => set((prev) => ({ members: [...prev.members, id] })),
+  add: (id) =>
+    set((prev) => {
+      if (!prev.members.includes(id)) {
+        return { members: [...prev.members, id] }
+      }
+      return prev
+    }),
   remove: (id) =>
     set((prev) => ({ members: prev.members.filter((m) => m !== id) })),
   set: (ids) => set({ members: ids }),

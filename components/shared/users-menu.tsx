@@ -77,7 +77,12 @@ const UsersMenu = () => {
                   key={user.id}
                   onClick={async () => await onClick(user.id)}
                 >
-                  <UserCard key={user.id} id={user.id} name={user.name ?? ""} />
+                  <UserCard
+                    key={user.id}
+                    id={user.id}
+                    name={user.name ?? ""}
+                    image={user.image}
+                  />
                 </button>
               ))}
             </div>

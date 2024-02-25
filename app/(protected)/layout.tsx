@@ -1,4 +1,6 @@
 import { redirect } from "next/navigation"
+import axios from "axios"
+import { debounce } from "lodash"
 
 import { currentUser } from "@/lib/auth"
 import BottomBar from "@/components/navigation/bottom-bar"
@@ -14,6 +16,7 @@ export default async function RootLayout({
   if (!user) {
     return redirect("/auth/login")
   }
+
   return (
     <main>
       <SideBar user={user} />

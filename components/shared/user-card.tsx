@@ -1,10 +1,8 @@
 "use client"
 
-import React, { useMemo } from "react"
-import Image from "next/image"
+import { useMemo } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { useActiveList } from "@/store/zustand"
 
 import { cn } from "@/lib/utils"
 
@@ -20,13 +18,11 @@ const UserCard = ({
 }: {
   id: string
   name: string
-  image?: string
+  image?: string | null
   message?: string
   lastMessageTime?: string
   isSeen?: boolean
 }) => {
-  const activeList = useActiveList((state) => state.members)
-  console.log(activeList)
   const pathname = usePathname()!
   const conversationId = useMemo(() => pathname.split("/")?.pop(), [pathname])
   return (
