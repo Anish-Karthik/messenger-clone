@@ -41,13 +41,6 @@ export default async function handler(
     console.log(existingConversation)
     existingConversation.users.forEach((user) => {
       console.log(user)
-      // if (user.email) {
-      // pusherServer.trigger(
-      //   user.email,
-      //   "conversation:remove",
-      //   existingConversation.id
-      // )
-      // }
       if (user.id) {
         console.log(user.id)
         res?.socket?.server?.io?.emit(

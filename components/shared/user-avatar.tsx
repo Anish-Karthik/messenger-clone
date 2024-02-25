@@ -16,6 +16,7 @@ const UserAvatar = ({
   size?: number
 }) => {
   const { members } = useActiveList()
+  console.log(members)
   const isActive = useMemo(() => members.includes(id || ""), [members, id])
   return (
     <div className={cn("relative", !size ?? "h-12 min-w-12")}>

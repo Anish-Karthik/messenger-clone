@@ -1,15 +1,13 @@
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
-
-import TRPCProvider from "./_trpc/Provider"
-import "./globals.css"
 import { auth } from "@/auth"
-import { NextUIProvider } from "@nextui-org/react"
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
 import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin"
 import { SessionProvider } from "next-auth/react"
 import { extractRouterConfig } from "uploadthing/server"
 
+import TRPCProvider from "./_trpc/Provider"
+import "./globals.css"
 import { SocketProvider } from "@/components/provider/socket-provider"
 import { ToastProvider } from "@/components/provider/toaster-provider"
 import { ourFileRouter } from "@/app/api/uploadthing/core"
@@ -35,14 +33,12 @@ export default async function RootLayout({
             <ToastProvider />
             <NextSSRPlugin routerConfig={extractRouterConfig(ourFileRouter)} />
             <ReactQueryDevtools
-              initialIsOpen={true}
+              initialIsOpen={false}
               buttonPosition="bottom-left"
             />
-            <NextUIProvider>
-              <SocketProvider>
-                <div className="h-full">{children}</div>
-              </SocketProvider>
-            </NextUIProvider>
+            <SocketProvider>
+              <div className="h-full">{children}</div>
+            </SocketProvider>
           </body>
         </html>
       </TRPCProvider>

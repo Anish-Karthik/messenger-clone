@@ -9,7 +9,6 @@ export const publicRoutes = [
   "/api/uploadthing",
   "/api/trpc",
   "/test",
-  "/api/pusher",
   "/api/socket",
 ]
 

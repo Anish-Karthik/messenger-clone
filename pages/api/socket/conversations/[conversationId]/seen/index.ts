@@ -61,11 +61,6 @@ export default async function handler(
       },
     })
 
-    // Update all connections with new seen
-    // await pusherServer.trigger(currentUser.email, "conversation:update", {
-    //   id: conversationId,
-    //   messages: [updatedMessage],
-    // })
     res?.socket?.server?.io?.emit(`conversation:user:${currentUserId}update`, {
       id: conversationId,
       messages: [updatedMessage],
@@ -77,12 +72,6 @@ export default async function handler(
       return res.status(200).json(updatedMessage)
     }
 
-    // Update last message seen
-    // await pusherServer.trigger(
-    //   conversationId!,
-    //   "message:update",
-    //   updatedMessage
-    // )
     res?.socket?.server?.io?.emit(
       `conversation:${conversationId}:messages:update`,
       updatedMessage

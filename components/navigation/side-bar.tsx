@@ -43,8 +43,8 @@ const SideBar = ({ user }: { user: ExtendedUser }) => {
         </Link>
         <button
           onClick={() => {
-            logout()
             router.push("/")
+            logout()
           }}
           className={cn(
             "hover: rounded-md p-3 opacity-60 hover:bg-slate-200",

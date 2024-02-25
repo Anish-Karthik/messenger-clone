@@ -2,7 +2,6 @@ import { FullConversationType } from "@/types"
 import { z } from "zod"
 
 import { db } from "@/lib/db"
-import { pusherServer } from "@/lib/pusher"
 
 import { publicProcedure, router } from "../trpc"
 
@@ -89,11 +88,6 @@ export const conversationsRouter = router({
           },
         })
       console.log(newConversation.users)
-      newConversation.users.map((user) => {
-        if (user.id) {
-          pusherServer.trigger(user.id, "conversation:new", newConversation)
-        }
-      })
       return newConversation
     }),
 
@@ -110,9 +104,7 @@ export const conversationsRouter = router({
 
   delete: publicProcedure.input(z.string()).mutation(async ({ input: id }) => {
     const deletedConversation = await db.conversation.delete({ where: { id } })
-    deletedConversation.userIds.forEach((id) => {
-      pusherServer.trigger(id, "conversation:remove", deletedConversation.id)
-    })
+
     return deletedConversation
   }),
 
@@ -190,23 +182,12 @@ export const conversationsRouter = router({
       })
 
       const currentUser = conversation.users.find((user) => user.id === userId)!
-      // Update all connections with new seen
-      await pusherServer.trigger(currentUser.id!, "conversation:update", {
-        id: conversationId,
-        messages: [updatedMessage],
-      })
+
       console.log(lastMessage)
       // If user has already seen the message, no need to go further
       if (lastMessage.seenIds.indexOf(currentUser.id) !== -1) {
         return conversation
       }
-
-      // Update last message seen
-      await pusherServer.trigger(
-        conversationId!,
-        "message:update",
-        updatedMessage
-      )
       return updatedMessage
     }),
 })

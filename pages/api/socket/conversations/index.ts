@@ -47,9 +47,6 @@ export default async function handler(
 
       // Update all connections with new conversation
       newConversation.users.forEach((user) => {
-        if (user.email) {
-          // pusherServer.trigger(user.email, "conversation:new", newConversation)
-        }
         if (user.id) {
           res?.socket?.server?.io?.emit(
             `conversation:user:${user.id}:new`,
@@ -104,9 +101,6 @@ export default async function handler(
 
     // Update all connections with new conversation
     newConversation.users.map((user) => {
-      //   if (user.email) {
-      //     pusherServer.trigger(user.email, 'conversation:new', newConversation);
-      //   }
       if (user.id) {
         res?.socket?.server?.io?.emit(
           `conversation:user:${user.id}:new`,

@@ -25,12 +25,14 @@ interface ActiveListStore {
   add: (id: string) => void
   remove: (id: string) => void
   set: (ids: string[]) => void
+  isActive: (id: string) => boolean
 }
 
-export const useActiveList = create<ActiveListStore>((set) => ({
+export const useActiveList = create<ActiveListStore>((set, get) => ({
   members: [],
   add: (id) => set((prev) => ({ members: [...prev.members, id] })),
   remove: (id) =>
     set((prev) => ({ members: prev.members.filter((m) => m !== id) })),
   set: (ids) => set({ members: ids }),
+  isActive: (id) => get().members.includes(id),
 }))

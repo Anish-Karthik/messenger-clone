@@ -25,6 +25,8 @@ const UserCard = ({
   lastMessageTime?: string
   isSeen?: boolean
 }) => {
+  const activeList = useActiveList((state) => state.members)
+  console.log(activeList)
   const pathname = usePathname()!
   const conversationId = useMemo(() => pathname.split("/")?.pop(), [pathname])
   return (

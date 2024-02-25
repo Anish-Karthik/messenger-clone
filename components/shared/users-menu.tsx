@@ -28,7 +28,7 @@ const UsersMenu = () => {
     fetchPreviousPage,
   } = trpc.users.getAll.useInfiniteQuery(
     {
-      limit: 10,
+      limit: 12,
       id,
     },
     {
@@ -58,13 +58,13 @@ const UsersMenu = () => {
       toast.error("Something went wrong")
     }
   }
+
   return (
-    <div className="h-full w-full">
+    <div className="h-full w-full pb-2 max-lg:pb-20">
       <div className="mb-4 flex justify-between">
         <h1 className="text-2xl font-bold">People</h1>
       </div>
-
-      <div className="h-[95%] overflow-y-auto">
+      <div className="h-[90%] overflow-y-auto">
         {data &&
           data.pages?.flatMap((page, i) => (
             <div
@@ -83,16 +83,16 @@ const UsersMenu = () => {
             </div>
           ))}
         {(isFetchingNextPage || isLoading) &&
-          new Array(10).map((_, i) => (
-            <div key={i} className="flex items-center space-x-4">
+          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0].map((_, i) => (
+            <div className="my-3 flex items-center space-x-4 max-lg:w-full">
               <Skeleton className="h-12 w-12 rounded-full" />
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-[250px]" />
-                <Skeleton className="h-4 w-[200px]" />
+              <div className="space-y-2 max-lg:w-full">
+                <Skeleton className="h-4 w-[200px] max-lg:w-full" />
+                {/* <Skeleton className="h-4 w-[160px] max-lg:w-full" /> */}
               </div>
             </div>
           ))}
-        <div ref={ref} className="" />
+        <div ref={ref} className="h-1" />
       </div>
     </div>
   )

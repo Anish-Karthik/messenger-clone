@@ -1,16 +1,14 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useState } from "react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useAuthUser } from "@/store/zustand"
 import { FullConversationType } from "@/types"
 import { Message } from "@prisma/client"
 import { format } from "date-fns"
-import { find } from "lodash"
 import { useInView } from "react-intersection-observer"
 
-// import { pusherClient } from "@/lib/pusher"
 import { useCurrentUser } from "@/hooks/use-current-user"
 import { trpc } from "@/app/_trpc/client"
 
@@ -43,12 +41,9 @@ const ConversationsMenu = () => {
       gcTime: 4000,
     }
   )
-  // const pusherKey = useMemo(() => currUser?.id, [currUser?.id])
   const { inView, ref } = useInView()
   console.log(inView)
   useEffect(() => {
-    console.log(inView)
-    console.log(hasNextPage)
     if (inView && hasNextPage) {
       fetchNextPage()
     } else if (!hasNextPage) {
@@ -57,9 +52,6 @@ const ConversationsMenu = () => {
   }, [inView, hasNextPage, fetchNextPage, fetchPreviousPage, ref])
 
   useEffect(() => {
-    // if (!pusherKey) return
-
-    // pusherClient.subscribe(pusherKey)
     if (!socket) return
     const newHandler = async (conversation: FullConversationType) => {
       console.log(conversation)
@@ -91,7 +83,7 @@ const ConversationsMenu = () => {
   }, [currUser?.id, id, socket, utils.users.getAllConversations])
   console.log(data)
   return (
-    <div className="h-full w-full">
+    <div className="h-full w-full pb-2 max-lg:pb-20">
       <div className="mb-4 flex justify-between">
         <h1 className="text-2xl font-bold">Messages</h1>
         <GroupChatModal
@@ -110,7 +102,7 @@ const ConversationsMenu = () => {
           />
         </button>
       </div>
-      <div className="h-[95%] overflow-y-auto">
+      <div className="h-[90%] overflow-y-auto">
         {data &&
           data.pages?.flatMap((page, i) => (
             <div
@@ -119,13 +111,6 @@ const ConversationsMenu = () => {
               // ref={data.pages.length - 1 === i ? ref : undefined}
             >
               {page.items?.map((conversation) => {
-                console.log(conversation.messages)
-                console.log(conversation.lastMessageAt)
-                console.log(conversation.createdAt)
-                console.log(
-                  new Date(conversation.lastMessageAt) >
-                    new Date(conversation.createdAt)
-                )
                 return (
                   <button
                     key={conversation.id}
@@ -176,12 +161,12 @@ const ConversationsMenu = () => {
             </div>
           ))}
         {(isFetchingNextPage || isLoading) &&
-          new Array(10).map((_, i) => (
-            <div key={i} className="flex items-center space-x-4">
+          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0].map((_, i) => (
+            <div className="my-3 flex items-center space-x-4 max-lg:w-full">
               <Skeleton className="h-12 w-12 rounded-full" />
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-[250px]" />
-                <Skeleton className="h-4 w-[200px]" />
+              <div className="space-y-2 max-lg:w-full">
+                <Skeleton className="h-4 w-[200px] max-lg:w-full" />
+                <Skeleton className="h-4 w-[160px] max-lg:w-full" />
               </div>
             </div>
           ))}

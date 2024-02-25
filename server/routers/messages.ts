@@ -2,7 +2,6 @@ import { Message } from "@prisma/client"
 import { z } from "zod"
 
 import { db } from "@/lib/db"
-import { pusherServer } from "@/lib/pusher"
 
 import { publicProcedure, router } from "../trpc"
 
@@ -46,7 +45,6 @@ export const messagesRouter = router({
         })
         try {
           console.log(updatedConversation)
-          await pusherServer.trigger(conversationId, "messages:new", newMessage)
           console.log("No prob here")
           // last message is the new message without the sender
           let lastMessage = { ...newMessage, sender: undefined }
@@ -60,11 +58,6 @@ export const messagesRouter = router({
               id: conversationId,
               messages: [lastMessage],
             }
-            pusherServer.trigger(
-              user.id!,
-              "conversation:update",
-              lastMessageToBeSent
-            )
           })
         } catch (error) {
           console.log(error)
