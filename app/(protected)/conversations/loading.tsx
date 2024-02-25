@@ -1,7 +1,5 @@
-import React from "react"
 import { ClipLoader } from "react-spinners"
 
-import { Skeleton } from "@/components/ui/skeleton"
 
 const loading = () => {
   return (

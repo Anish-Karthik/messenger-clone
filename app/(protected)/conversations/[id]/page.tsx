@@ -16,7 +16,7 @@ const sleep = (time: number = 15000) => {
 }
 
 const page = async ({ params }: { params: { id: string } }) => {
-  await sleep()
+  // await sleep()
   if (!isValidObjectId(params.id)) {
     redirect("/conversations")
   }
